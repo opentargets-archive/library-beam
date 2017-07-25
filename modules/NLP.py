@@ -27,7 +27,9 @@ from unidecode import unidecode
 import spacy
 from spacy.language_data import TOKENIZER_INFIXES
 from spacy.tokenizer import Tokenizer
-import en_core_web_md
+# import en_core_web_md
+import en_depent_web_md
+
 
 from AbbreviationFinder import AbbreviationsParser
 from BioStopWords import DOMAIN_STOP_WORDS, COMMON_WORDS_CORPUS
@@ -65,7 +67,9 @@ def create_tokenizer(nlp):
 
 
 def init_spacy_english_language():
-    nlp = en_core_web_md.load(create_make_doc=create_tokenizer)
+    # nlp = en_core_web_md.load(create_make_doc=create_tokenizer)
+    nlp = en_depent_web_md.load(create_make_doc=create_tokenizer)
+
     # nlp.vocab.strings.set_frozen(True)
     return nlp
 

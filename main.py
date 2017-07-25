@@ -7,7 +7,8 @@ import logging
 from datetime import date, datetime
 
 import apache_beam as beam
-import en_core_web_md
+import en_depent_web_md
+# import en_core_web_md
 import spacy
 import textblob
 from textblob.download_corpora import download_lite as textblob_download_lite_corpora
@@ -76,7 +77,6 @@ def json_serialize(obj):
 class _MedlineTextSource(_TextSource):
     def read_records(self, file_path, range_tracker):
         logging.info(file_path)
-        print file_path
         file_name = file_path.split('/')[-1]
         record = []
         skip = True
@@ -442,6 +442,7 @@ class NLPAnalysis(beam.DoFn):
         """
         if not hasattr(self, 'nlp'):
             self.init_nlp()
+            logging.info('INIT NLP MODEL')
 
 
 
@@ -470,7 +471,8 @@ class NLPAnalysis(beam.DoFn):
                          infix_re.finditer)
     @staticmethod
     def _init_spacy_english_language():
-        nlp = en_core_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
+        # nlp = en_core_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
+        nlp = en_depent_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
         # nlp.vocab.strings.set_frozen(True)
         return nlp
 
