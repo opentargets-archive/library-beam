@@ -426,10 +426,7 @@ class NLPAnalysis(beam.DoFn):
 
     def process(self, element, *args, **kwargs):
         element['text_mined_entities'] = {}
-        if not getattr(self, 'nlp', None):
-            self.init_models()
-        else:
-            logging.debug('NLP MODEL already initialized')
+
         for analyzer in self.analyzers:
             try:
                 element['text_mined_entities'][str(analyzer)]=analyzer.digest(get_text_to_analyze(element))
@@ -445,7 +442,10 @@ class NLPAnalysis(beam.DoFn):
         to workers. Before a worker calls process() on the first element
         of its bundle, it calls this method.
         """
-
+        if not getattr(self, 'nlp', None):
+            self.init_models()
+        else:
+            logging.debug('NLP MODEL already initialized')
 
     def init_models(self):
         steps_done = []
@@ -628,6 +628,7 @@ def run(argv=None):
     with beam.Pipeline(options=pipeline_options) as p:
 
         if known_args.input_baseline or known_args.input_updates:
+            nltk.download()
 
             if known_args.input_baseline and known_args.input_updates:
                 medline_articles_base = p | 'BaselineEmitXML' >> ReadMedlineFiles(known_args.input_baseline)
