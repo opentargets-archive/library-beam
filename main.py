@@ -431,7 +431,6 @@ class NLPAnalysis(beam.DoFn):
             except:
                 logging.exception("error in nlp analysis with %s analyser for text: %s"%(str(analyzer), get_text_to_analyze(element)))
                 element['text_mined_entities'][str(analyzer)] = {}
-                raise
         yield element
 
     def start_bundle(self):
