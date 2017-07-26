@@ -7,8 +7,8 @@ import logging
 from datetime import date, datetime
 
 import apache_beam as beam
-# import en_depent_web_md
-import en_core_web_md
+import en_depent_web_md
+# import en_core_web_md
 import spacy
 import textblob
 from textblob.download_corpora import download_lite as textblob_download_lite_corpora
@@ -443,17 +443,7 @@ class NLPAnalysis(beam.DoFn):
         """
         if not hasattr(self, 'nlp'):
             try:
-                # self.init_nlp()
-                try:
-                    logging.debug('DOWNLOADING TEXTBLOB LITE CORPORA')
-                    textblob_download_lite_corpora()
-                    logging.debug('STARTING NLPAnalysis')
-                    self.nlp = NLPAnalysis._init_spacy_english_language()
-                    logging.debug('STARTING TAGGER')
-                    self._tagger = BioEntityTagger(partial_match=False)
-                    self.analyzers = [NounChuncker(), DocumentAnalysisSpacy(self.nlp, tagger=self._tagger)]
-                except:
-                    logging.exception('IT IS A BIG MESS HERE')
+                self.init_nlp()
                 logging.info('INIT NLP MODEL')
             except:
                 logging.exception('NLP MODEL INIT FAILED MISERABLY')
@@ -487,8 +477,8 @@ class NLPAnalysis(beam.DoFn):
                          infix_re.finditer)
     @staticmethod
     def _init_spacy_english_language():
-        nlp = en_core_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
-        # nlp = en_depent_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
+        # nlp = en_core_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
+        nlp = en_depent_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
         # nlp.vocab.strings.set_frozen(True)
         return nlp
 

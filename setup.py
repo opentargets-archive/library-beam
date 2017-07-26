@@ -69,7 +69,7 @@ CUSTOM_COMMANDS = [
     ['pip', 'install', 'textblob'],
     ['python','-m','textblob.download_corpora'],
     ['pip', 'install',
-     'https://github.com/explosion/spacy-models/releases/download/en_core_web_md-1.2.1/en_core_web_md-1.2.1.tar.gz']
+     'https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz']
 
 ]
 
