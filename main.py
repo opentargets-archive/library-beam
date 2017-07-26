@@ -450,8 +450,8 @@ class NLPAnalysis(beam.DoFn):
         steps_done = []
 
         try:
-            # steps_done.append('DOWNLOADING TEXTBLOB LITE CORPORA')
-            # textblob_download_lite_corpora()
+            steps_done.append('DOWNLOADING TEXTBLOB LITE CORPORA')
+            textblob_download_lite_corpora()
             steps_done.append('STARTING NLPAnalysis')
             self.nlp = NLPAnalysis._init_spacy_english_language()
             steps_done.append('STARTING TAGGER')
