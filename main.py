@@ -440,21 +440,24 @@ class NLPAnalysis(beam.DoFn):
         to workers. Before a worker calls process() on the first element
         of its bundle, it calls this method.
         """
-        if not hasattr(self, 'nlp'):
+        steps_done = []
+        if not getattr(self, 'nlp', None):
             try:
-                logging.debug('DOWNLOADING TEXTBLOB LITE CORPORA')
+                steps_done.append('DOWNLOADING TEXTBLOB LITE CORPORA')
                 textblob_download_lite_corpora()
-                logging.debug('STARTING NLPAnalysis')
+                steps_done.append('STARTING NLPAnalysis')
                 self.nlp = NLPAnalysis._init_spacy_english_language()
-                logging.debug('STARTING STARTING')
+                steps_done.append('STARTING TAGGER')
                 self._tagger = BioEntityTagger(partial_match=False)
                 self.analyzers = [NounChuncker(), DocumentAnalysisSpacy(self.nlp, tagger=self._tagger)]
-                logging.info('NLP MODEL INITIALIZED')
+                steps_done.append('NLP MODEL INITIALIZED')
             except:
                 logging.exception('NLP MODEL INIT FAILED MISERABLY')
+                steps_done.append('NLP MODEL INIT FAILED MISERABLY')
         else:
-            logging.debug('NLP MODEL already initialized')
+            steps_done.append('NLP MODEL already initialized')
 
+        logging.critical(steps_done)
 
 
     @staticmethod
