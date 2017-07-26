@@ -628,14 +628,7 @@ def run(argv=None):
     with beam.Pipeline(options=pipeline_options) as p:
 
         if known_args.input_baseline or known_args.input_updates:
-            MIN_CORPORA = [
-                'brown',  # Required for FastNPExtractor
-                'punkt',  # Required for WordTokenizer
-                'wordnet',  # Required for lemmatization
-                'averaged_perceptron_tagger',  # Required for NLTKTagger
-            ]
-            for each in MIN_CORPORA:
-                nltk.download(each)
+            textblob_download_lite_corpora()
 
             if known_args.input_baseline and known_args.input_updates:
                 medline_articles_base = p | 'BaselineEmitXML' >> ReadMedlineFiles(known_args.input_baseline)

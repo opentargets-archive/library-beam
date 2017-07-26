@@ -22,6 +22,7 @@ from textblob import TextBlob
 from textblob.base import BaseNPExtractor
 from textblob.decorators import requires_nltk_corpus
 from textblob.en.np_extractors import _normalize_tags
+from textblob.download_corpora import download_lite
 from unidecode import unidecode
 
 import spacy
@@ -212,6 +213,7 @@ class PerceptronNPExtractor(BaseNPExtractor):
     def extract(self, sentence):
         '''Return a list of noun phrases (strings) for body of text.'''
         if not self._trained:
+            download_lite()
             self.train()
         tokens = self._tokenize_sentence(sentence)
         tagged = self.tagger.tag(tokens)
