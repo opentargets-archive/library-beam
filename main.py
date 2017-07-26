@@ -7,8 +7,8 @@ import logging
 from datetime import date, datetime
 
 import apache_beam as beam
-import en_depent_web_md
-# import en_core_web_md
+# import en_depent_web_md
+import en_core_web_md
 import spacy
 import textblob
 from textblob.download_corpora import download_lite as textblob_download_lite_corpora
@@ -431,6 +431,7 @@ class NLPAnalysis(beam.DoFn):
             except:
                 logging.exception("error in nlp analysis with %s analyser for text: %s"%(str(analyzer), get_text_to_analyze(element)))
                 element['text_mined_entities'][str(analyzer)] = {}
+                raise
         yield element
 
     def start_bundle(self):
@@ -441,8 +442,23 @@ class NLPAnalysis(beam.DoFn):
         of its bundle, it calls this method.
         """
         if not hasattr(self, 'nlp'):
-            self.init_nlp()
-            logging.info('INIT NLP MODEL')
+            try:
+                # self.init_nlp()
+                try:
+                    logging.debug('DOWNLOADING TEXTBLOB LITE CORPORA')
+                    textblob_download_lite_corpora()
+                    logging.debug('STARTING NLPAnalysis')
+                    self.nlp = NLPAnalysis._init_spacy_english_language()
+                    logging.debug('STARTING TAGGER')
+                    self._tagger = BioEntityTagger(partial_match=False)
+                    self.analyzers = [NounChuncker(), DocumentAnalysisSpacy(self.nlp, tagger=self._tagger)]
+                except:
+                    logging.exception('IT IS A BIG MESS HERE')
+                logging.info('INIT NLP MODEL')
+            except:
+                logging.exception('NLP MODEL INIT FAILED MISERABLY')
+        else:
+            logging.debug('NLP MODEL already initialized')
 
 
 
@@ -471,16 +487,22 @@ class NLPAnalysis(beam.DoFn):
                          infix_re.finditer)
     @staticmethod
     def _init_spacy_english_language():
-        # nlp = en_core_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
-        nlp = en_depent_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
+        nlp = en_core_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
+        # nlp = en_depent_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
         # nlp.vocab.strings.set_frozen(True)
         return nlp
 
     def init_nlp(self):
-        textblob_download_lite_corpora()
-        self.nlp = NLPAnalysis._init_spacy_english_language()
-        self._tagger =  BioEntityTagger(partial_match=False)
-        self.analyzers = [NounChuncker(), DocumentAnalysisSpacy(self.nlp, tagger=self._tagger)]
+        try:
+            logging.debug('DOWNLOADING TEXTBLOB LITE CORPORA')
+            textblob_download_lite_corpora()
+            logging.debug('STARTING NLPAnalysis')
+            self.nlp = NLPAnalysis._init_spacy_english_language()
+            logging.debug('STARTING STARTING')
+            self._tagger =  BioEntityTagger(partial_match=False)
+            self.analyzers = [NounChuncker(), DocumentAnalysisSpacy(self.nlp, tagger=self._tagger)]
+        except:
+            logging.exception('IT IS A BIG MESS HERE')
 
 
 class ToJSON(beam.DoFn):
@@ -567,6 +589,11 @@ class Print(beam.DoFn):
         print element
 
 
+class Consume(beam.DoFn):
+    def process(self, element, *args, **kwargs):
+        pass
+
+
 
 
 
@@ -620,6 +647,8 @@ def run(argv=None):
 
 
             parsed_medline_articles = medline_articles | 'ParseXMLtoDict' >> beam.ParDo(MedlineXMLParser())
+            # parsed_medline_articles | 'ConsumeJSON' >> beam.ParDo(Consume())
+
 
             json_medline_articles = parsed_medline_articles | 'MedlineToJSON' >> beam.ParDo(ToJSON())
 

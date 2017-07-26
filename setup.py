@@ -28,6 +28,7 @@ when running the workflow for remote execution.
 import subprocess
 from distutils.command.build import build as _build
 
+import logging
 import setuptools
 
 
@@ -65,11 +66,11 @@ class build(_build):  # pylint: disable=invalid-name
 CUSTOM_COMMANDS = [
     ['apt-get', 'update'],
     ['apt-get', '--assume-yes', 'install', 'libxml2-dev'],
+    ['pip', 'install', 'textblob'],
+    ['python','-m','textblob.download_corpora'],
     ['pip', 'install',
-     # 'https://github.com/explosion/spacy-models/releases/download/en_core_web_md-1.2.1/en_core_web_md-1.2.1.tar.gz',
-     'https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz',
-     'textblob'],
-    ['python','-m','textblob.download_corpora']
+     'https://github.com/explosion/spacy-models/releases/download/en_core_web_md-1.2.1/en_core_web_md-1.2.1.tar.gz']
+
 ]
 
 
@@ -83,14 +84,14 @@ class CustomCommands(setuptools.Command):
         pass
 
     def RunCustomCommand(self, command_list):
-        print 'Running command: %s' % command_list
+        logging.debug('Running command: %s' % command_list)
         p = subprocess.Popen(
             command_list,
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         # Can use communicate(input='y\n'.encode()) if the command run requires
         # some confirmation.
         stdout_data, _ = p.communicate()
-        print 'Command output: %s' % stdout_data
+        logging.debug('Command output: %s' % stdout_data)
         if p.returncode != 0:
             raise RuntimeError(
                 'Command %s failed: exit code: %s' % (command_list, p.returncode))
@@ -134,7 +135,7 @@ REQUIRED_PACKAGES = [
 
 setuptools.setup(
     name='opentargets-library-beam',
-    version='0.0.1',
+    version='0.0.2',
     description='ETL for opentargets library runnin on beam',
     install_requires=REQUIRED_PACKAGES,
     # dependency_links=['https://github.com/explosion/spacy-models/releases/download/en_core_web_md-1.2.1

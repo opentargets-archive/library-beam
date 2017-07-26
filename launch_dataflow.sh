@@ -8,12 +8,12 @@ python -m main \
   --worker_machine_type n1-highmem-16 \
   --input_baseline gs://pubmed-medline/baseline/medline17n*.xml.gz \
   --input_updates gs://pubmed-medline/updatefiles/medline17n*.xml.gz \
-  --output_splitted gs://medline-json/splitted/medline-base17 \
   --output gs://medline-json/parsed/medline-base17 \
   --output_enriched gs://medline-json/analyzed/medline-base17 \
   --num_workers 30 \
   --zone europe-west1-d
 
 #  --requirements_file requirements.txt \
+#  --output_splitted gs://medline-json/splitted/medline-base17 \
 
 
