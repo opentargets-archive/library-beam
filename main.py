@@ -442,8 +442,14 @@ class NLPAnalysis(beam.DoFn):
         """
         if not hasattr(self, 'nlp'):
             try:
-                self.init_nlp()
-                logging.info('INIT NLP MODEL')
+                logging.debug('DOWNLOADING TEXTBLOB LITE CORPORA')
+                textblob_download_lite_corpora()
+                logging.debug('STARTING NLPAnalysis')
+                self.nlp = NLPAnalysis._init_spacy_english_language()
+                logging.debug('STARTING STARTING')
+                self._tagger = BioEntityTagger(partial_match=False)
+                self.analyzers = [NounChuncker(), DocumentAnalysisSpacy(self.nlp, tagger=self._tagger)]
+                logging.info('NLP MODEL INITIALIZED')
             except:
                 logging.exception('NLP MODEL INIT FAILED MISERABLY')
         else:
@@ -480,18 +486,6 @@ class NLPAnalysis(beam.DoFn):
         nlp = en_depent_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
         # nlp.vocab.strings.set_frozen(True)
         return nlp
-
-    def init_nlp(self):
-        try:
-            logging.debug('DOWNLOADING TEXTBLOB LITE CORPORA')
-            textblob_download_lite_corpora()
-            logging.debug('STARTING NLPAnalysis')
-            self.nlp = NLPAnalysis._init_spacy_english_language()
-            logging.debug('STARTING STARTING')
-            self._tagger =  BioEntityTagger(partial_match=False)
-            self.analyzers = [NounChuncker(), DocumentAnalysisSpacy(self.nlp, tagger=self._tagger)]
-        except:
-            logging.exception('IT IS A BIG MESS HERE')
 
 
 class ToJSON(beam.DoFn):
