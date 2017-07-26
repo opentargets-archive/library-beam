@@ -9,6 +9,7 @@ from datetime import date, datetime
 import apache_beam as beam
 import en_depent_web_md
 # import en_core_web_md
+import nltk
 import spacy
 import textblob
 from textblob.download_corpora import download_lite as textblob_download_lite_corpora
@@ -451,12 +452,20 @@ class NLPAnalysis(beam.DoFn):
 
         try:
             steps_done.append('DOWNLOADING TEXTBLOB LITE CORPORA')
-            textblob_download_lite_corpora()
+            # MIN_CORPORA = [
+            #     'brown',  # Required for FastNPExtractor
+            #     'punkt',  # Required for WordTokenizer
+            #     'wordnet',  # Required for lemmatization
+            #     'averaged_perceptron_tagger',  # Required for NLTKTagger
+            # ]
+            # for each in MIN_CORPORA:
+            #         nltk.download(each)
+            nltk.download()
             steps_done.append('STARTING NLPAnalysis')
             self.nlp = NLPAnalysis._init_spacy_english_language()
             steps_done.append('STARTING TAGGER')
             self._tagger = BioEntityTagger(partial_match=False)
-            self.analyzers = [NounChuncker(), DocumentAnalysisSpacy(self.nlp, tagger=self._tagger)]
+            self.analyzers = [DocumentAnalysisSpacy(self.nlp, tagger=self._tagger),NounChuncker()]
             steps_done.append('NLP MODEL INITIALIZED')
         except:
             logging.exception('NLP MODEL INIT FAILED MISERABLY')
