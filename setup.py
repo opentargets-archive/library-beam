@@ -112,7 +112,6 @@ REQUIRED_PACKAGES = [
     'python-dateutil',
     'lxml',
     'spacy',
-    'textblob',
     'pyahocorasick',
     'python-Levenshtein',
     'fuzzywuzzy',
@@ -128,6 +127,7 @@ REQUIRED_PACKAGES = [
     'elasticsearch',
     'tqdm',
     'nltk',
+    # 'textblob'
 
 
     # 'en_core_web_md-1.2.1',

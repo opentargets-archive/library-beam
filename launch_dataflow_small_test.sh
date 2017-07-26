@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 python -m main \
   --project open-targets \
-  --job_name open-targets-medline-process-test-critical\
+  --job_name open-targets-medline-process-test-install-external-textblob\
   --runner DataflowRunner \
   --temp_location gs://opentargets-library-tmp/temp-new \
   --setup_file ./setup.py \

@@ -425,6 +425,10 @@ class NLPAnalysis(beam.DoFn):
 
     def process(self, element, *args, **kwargs):
         element['text_mined_entities'] = {}
+        if not getattr(self, 'nlp', None):
+            self.init_models()
+        else:
+            logging.debug('NLP MODEL already initialized')
         for analyzer in self.analyzers:
             try:
                 element['text_mined_entities'][str(analyzer)]=analyzer.digest(get_text_to_analyze(element))
@@ -440,25 +444,26 @@ class NLPAnalysis(beam.DoFn):
         to workers. Before a worker calls process() on the first element
         of its bundle, it calls this method.
         """
+
+
+    def init_models(self):
         steps_done = []
-        if not getattr(self, 'nlp', None):
-            try:
-                steps_done.append('DOWNLOADING TEXTBLOB LITE CORPORA')
-                textblob_download_lite_corpora()
-                steps_done.append('STARTING NLPAnalysis')
-                self.nlp = NLPAnalysis._init_spacy_english_language()
-                steps_done.append('STARTING TAGGER')
-                self._tagger = BioEntityTagger(partial_match=False)
-                self.analyzers = [NounChuncker(), DocumentAnalysisSpacy(self.nlp, tagger=self._tagger)]
-                steps_done.append('NLP MODEL INITIALIZED')
-            except:
-                logging.exception('NLP MODEL INIT FAILED MISERABLY')
-                steps_done.append('NLP MODEL INIT FAILED MISERABLY')
-        else:
-            steps_done.append('NLP MODEL already initialized')
 
-        logging.critical(steps_done)
+        try:
+            # steps_done.append('DOWNLOADING TEXTBLOB LITE CORPORA')
+            # textblob_download_lite_corpora()
+            steps_done.append('STARTING NLPAnalysis')
+            self.nlp = NLPAnalysis._init_spacy_english_language()
+            steps_done.append('STARTING TAGGER')
+            self._tagger = BioEntityTagger(partial_match=False)
+            self.analyzers = [NounChuncker(), DocumentAnalysisSpacy(self.nlp, tagger=self._tagger)]
+            steps_done.append('NLP MODEL INITIALIZED')
+        except:
+            logging.exception('NLP MODEL INIT FAILED MISERABLY')
+            steps_done.append('NLP MODEL INIT FAILED MISERABLY')
 
+
+        logging.info(steps_done)
 
     @staticmethod
     def _create_tokenizer(nlp):
