@@ -452,15 +452,15 @@ class NLPAnalysis(beam.DoFn):
 
         try:
             steps_done.append('DOWNLOADING TEXTBLOB LITE CORPORA')
-            # MIN_CORPORA = [
-            #     'brown',  # Required for FastNPExtractor
-            #     'punkt',  # Required for WordTokenizer
-            #     'wordnet',  # Required for lemmatization
-            #     'averaged_perceptron_tagger',  # Required for NLTKTagger
-            # ]
-            # for each in MIN_CORPORA:
-            #         nltk.download(each)
-            nltk.download()
+            MIN_CORPORA = [
+                'brown',  # Required for FastNPExtractor
+                'punkt',  # Required for WordTokenizer
+                'wordnet',  # Required for lemmatization
+                'averaged_perceptron_tagger',  # Required for NLTKTagger
+            ]
+            for each in MIN_CORPORA:
+                    nltk.download(each)
+            # nltk.download()
             steps_done.append('STARTING NLPAnalysis')
             self.nlp = NLPAnalysis._init_spacy_english_language()
             steps_done.append('STARTING TAGGER')
@@ -628,7 +628,14 @@ def run(argv=None):
     with beam.Pipeline(options=pipeline_options) as p:
 
         if known_args.input_baseline or known_args.input_updates:
-            nltk.download()
+            MIN_CORPORA = [
+                'brown',  # Required for FastNPExtractor
+                'punkt',  # Required for WordTokenizer
+                'wordnet',  # Required for lemmatization
+                'averaged_perceptron_tagger',  # Required for NLTKTagger
+            ]
+            for each in MIN_CORPORA:
+                nltk.download(each)
 
             if known_args.input_baseline and known_args.input_updates:
                 medline_articles_base = p | 'BaselineEmitXML' >> ReadMedlineFiles(known_args.input_baseline)
