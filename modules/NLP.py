@@ -213,7 +213,6 @@ class PerceptronNPExtractor(BaseNPExtractor):
     def extract(self, sentence):
         '''Return a list of noun phrases (strings) for body of text.'''
         if not self._trained:
-            download_lite()
             self.train()
         tokens = self._tokenize_sentence(sentence)
         tagged = self.tagger.tag(tokens)

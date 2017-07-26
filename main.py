@@ -12,7 +12,6 @@ import en_depent_web_md
 import nltk
 import spacy
 import textblob
-from textblob.download_corpora import download_lite as textblob_download_lite_corpora
 
 from modules.BioentityTagger import BioEntityTagger
 from apache_beam.coders import coders
@@ -451,16 +450,16 @@ class NLPAnalysis(beam.DoFn):
         steps_done = []
 
         try:
-            steps_done.append('DOWNLOADING TEXTBLOB LITE CORPORA')
-            MIN_CORPORA = [
-                'brown',  # Required for FastNPExtractor
-                'punkt',  # Required for WordTokenizer
-                'wordnet',  # Required for lemmatization
-                'averaged_perceptron_tagger',  # Required for NLTKTagger
-            ]
-            for each in MIN_CORPORA:
-                    nltk.download(each)
-            # nltk.download()
+            # steps_done.append('DOWNLOADING TEXTBLOB LITE CORPORA')
+            # MIN_CORPORA = [
+            #     'brown',  # Required for FastNPExtractor
+            #     'punkt',  # Required for WordTokenizer
+            #     'wordnet',  # Required for lemmatization
+            #     'averaged_perceptron_tagger',  # Required for NLTKTagger
+            # ]
+            # for each in MIN_CORPORA:
+            #         nltk.download(each)
+            # # nltk.download()
             steps_done.append('STARTING NLPAnalysis')
             self.nlp = NLPAnalysis._init_spacy_english_language()
             steps_done.append('STARTING TAGGER')
@@ -628,7 +627,6 @@ def run(argv=None):
     with beam.Pipeline(options=pipeline_options) as p:
 
         if known_args.input_baseline or known_args.input_updates:
-            textblob_download_lite_corpora()
 
             if known_args.input_baseline and known_args.input_updates:
                 medline_articles_base = p | 'BaselineEmitXML' >> ReadMedlineFiles(known_args.input_baseline)
