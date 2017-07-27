@@ -68,11 +68,10 @@ CUSTOM_COMMANDS = [
     ['pip', 'install',
      'https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz',
      'nltk'],
-    ['export','PATH_TO_NLTK_DATA=$HOME/nltk_data/'],
     ['wget', 'https://github.com/nltk/nltk_data/archive/gh-pages.zip'],
-    ['unzip', 'gh-pages.zip', '-d', '$PATH_TO_NLTK_DATA'],
-    ['rm', '-rf', '$PATH_TO_NLTK_DATA/corpora'],
-    ['mv', '$PATH_TO_NLTK_DATA/nltk_data-gh-pages/packages/*', '$PATH_TO_NLTK_DATA/'],
+    ['rm', '-rf', '/root/nltk_data/corpora'],
+    ['unzip', 'gh-pages.zip', '-d', '/root/nltk_data/'],
+    ['mv', '/root/nltk_data/nltk_data-gh-pages/packages/*', '/root/nltk_data/'],
 
     # get nltk coprora from alternative url
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 python -m main \
   --project open-targets \
-  --job_name open-targets-medline-process-full \
+  --job_name open-targets-medline-process-full-manual-nltk\
   --runner DataflowRunner \
   --temp_location gs://opentargets-library-tmp/temp \
   --setup_file ./setup.py \
