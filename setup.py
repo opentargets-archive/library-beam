@@ -65,12 +65,14 @@ class build(_build):  # pylint: disable=invalid-name
 # worker-startup log.
 CUSTOM_COMMANDS = [
     ['apt-get', 'update'],
-    ['apt-get', '--assume-yes', 'install', 'libxml2-dev'],
+    ['apt-get', '--assume-yes', 'install', 'libxml2-dev', 'wget', 'unzip'],
     ['pip', 'install',
      'https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz',
      'nltk'],
-    ['python', '-m', 'nltk.downloader', '-u', 'https://pastebin.com/raw/D3TBY4Mj', 'brown', 'punkt', 'wordnet',
-     'averaged_perceptron_tagger', 'conll2000']
+    ['PATH_TO_NLTK_DATA=$HOME/nltk_data/'],
+    ['wget', 'https://github.com/nltk/nltk_data/archive/gh-pages.zip'],
+    ['unzip', 'gh-pages.zip', '-d', '$PATH_TO_NLTK_DATA'],
+    ['mv', '$PATH_TO_NLTK_DATA/nltk_data-gh-pages/packages/*', '$PATH_TO_NLTK_DATA/'],
 
     # get nltk coprora from alternative url
 
