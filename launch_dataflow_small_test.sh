@@ -9,6 +9,7 @@ python -m main \
   --input_baseline gs://pubmed-medline/baseline/medline17n08*.xml.gz \
   --output gs://medline-json/test/parsed/medline-base17 \
   --output_enriched gs://medline-json/test/analyzed/medline-base17 \
+  --max_num_workers 3 \
   --zone europe-west1-d
 
 #  --requirements_file requirements.txt \

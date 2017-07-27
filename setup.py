@@ -25,10 +25,10 @@ This behavior is triggered by specifying the --setup_file command line option
 when running the workflow for remote execution.
 """
 
+import logging
 import subprocess
 from distutils.command.build import build as _build
 
-import logging
 import setuptools
 
 
@@ -67,8 +67,12 @@ CUSTOM_COMMANDS = [
     ['apt-get', 'update'],
     ['apt-get', '--assume-yes', 'install', 'libxml2-dev'],
     ['pip', 'install',
-     'https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz', 'nltk'],
-    ['python', '-m', 'nltk.downloader', '-u', 'https://pastebin.com/raw/D3TBY4Mj', 'all']#get nltk coprora from alternative url
+     'https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz',
+     'nltk'],
+    ['python', '-m', 'nltk.downloader', '-u', 'https://pastebin.com/raw/D3TBY4Mj', 'brown', 'punkt', 'wordnet',
+     'averaged_perceptron_tagger', 'conll2000']
+
+    # get nltk coprora from alternative url
 
 ]
 
@@ -127,7 +131,6 @@ REQUIRED_PACKAGES = [
     'tqdm',
     'nltk',
     'textblob'
-
 
     # 'en_core_web_md-1.2.1',
 ]
