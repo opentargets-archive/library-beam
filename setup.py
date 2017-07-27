@@ -25,7 +25,6 @@ This behavior is triggered by specifying the --setup_file command line option
 when running the workflow for remote execution.
 """
 
-import logging
 import subprocess
 from distutils.command.build import build as _build
 
@@ -69,9 +68,10 @@ CUSTOM_COMMANDS = [
     ['pip', 'install',
      'https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz',
      'nltk'],
-    ['PATH_TO_NLTK_DATA=$HOME/nltk_data/'],
+    ['export','PATH_TO_NLTK_DATA=$HOME/nltk_data/'],
     ['wget', 'https://github.com/nltk/nltk_data/archive/gh-pages.zip'],
     ['unzip', 'gh-pages.zip', '-d', '$PATH_TO_NLTK_DATA'],
+    ['rm', '-rf', '$PATH_TO_NLTK_DATA/corpora'],
     ['mv', '$PATH_TO_NLTK_DATA/nltk_data-gh-pages/packages/*', '$PATH_TO_NLTK_DATA/'],
 
     # get nltk coprora from alternative url
@@ -89,14 +89,14 @@ class CustomCommands(setuptools.Command):
         pass
 
     def RunCustomCommand(self, command_list):
-        logging.debug('Running command: %s' % command_list)
+        print 'Running command: %s' % command_list
         p = subprocess.Popen(
             command_list,
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         # Can use communicate(input='y\n'.encode()) if the command run requires
         # some confirmation.
         stdout_data, _ = p.communicate()
-        logging.debug('Command output: %s' % stdout_data)
+        print 'Command output: %s' % stdout_data
         if p.returncode != 0:
             raise RuntimeError(
                 'Command %s failed: exit code: %s' % (command_list, p.returncode))
