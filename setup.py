@@ -68,10 +68,12 @@ CUSTOM_COMMANDS = [
     ['pip', 'install',
      'https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz',
      'nltk'],
-    ['wget', 'https://github.com/nltk/nltk_data/archive/gh-pages.zip', '-O', '/root/nltkdata.zip'],
-    ['rm', '-rf', '/root/nltk_data/corpora'],
-    ['unzip', '/root/nltkdata.zip', '-d', '/root/nltk_data/'],
-    ['mv', '/root/nltk_data/nltk_data-gh-pages/packages/*', '/root/nltk_data/'],
+
+    ['python', '-m', 'nltk.downloader', 'brown', 'punkt', 'wordnet', 'averaged_perceptron_tagger', 'conll2000', 'stopwords']
+    # ['wget', 'https://github.com/nltk/nltk_data/archive/gh-pages.zip', '-O', '/root/nltkdata.zip'],
+    # ['rm', '-rf', '/root/nltk_data/corpora'],
+    # ['unzip', '/root/nltkdata.zip', '-d', '/root/nltk_data/'],
+    # ['mv', '/root/nltk_data/nltk_data-gh-pages/packages/*', '/root/nltk_data/'],
 
     # get nltk coprora from alternative url
 
@@ -95,7 +97,7 @@ class CustomCommands(setuptools.Command):
         # Can use communicate(input='y\n'.encode()) if the command run requires
         # some confirmation.
         stdout_data, stdout_err = p.communicate()
-        print 'Command output: % | Command err: %' % (stdout_data, stdout_err)
+        print 'Command output: %s | Command err: %s' % (stdout_data, stdout_err)
         if p.returncode != 0:
             raise RuntimeError(
                 'Command %s failed: exit code: %s' % (command_list, p.returncode))
