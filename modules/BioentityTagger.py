@@ -56,6 +56,8 @@ class BioEntityTagger(object):
                 if not dictionary_request.ok:
                     time.sleep(5)
                     retry+=1
+                else:
+                    break
             if not dictionary_request.ok:
                 logging.error('cannot download dictionary %s, skipped'%dictionary_url)
                 continue
