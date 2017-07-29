@@ -469,6 +469,7 @@ class NLPAnalysis(beam.DoFn):
         except:
             logging.exception('NLP MODEL INIT FAILED MISERABLY')
             steps_done.append('NLP MODEL INIT FAILED MISERABLY')
+            self.analyzers = []
 
 
         logging.info(steps_done)
@@ -649,10 +650,10 @@ def run(argv=None):
             # parsed_medline_articles | 'ConsumeJSON' >> beam.ParDo(Consume())
 
 
-            json_medline_articles = parsed_medline_articles | 'MedlineToJSON' >> beam.ParDo(ToJSON())
-
+            # json_medline_articles = parsed_medline_articles | 'MedlineToJSON' >> beam.ParDo(ToJSON())
             #
-            json_medline_articles | 'WriteJSONToGS' >> WriteToText(known_args.output, file_name_suffix='.json.gz')
+            # #
+            # json_medline_articles | 'WriteJSONToGS' >> WriteToText(known_args.output, file_name_suffix='.json.gz')
             #
             # json_medline_articles |  'WriteMedlneJSONToBQ' >> beam.io.Write(
             #                                                         beam.io.BigQuerySink(

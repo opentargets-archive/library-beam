@@ -2,6 +2,7 @@ import ahocorasick
 
 import logging
 import requests
+import time
 from fuzzywuzzy import fuzz
 from rope.base.codeanalyze import ChangeCollector
 
@@ -48,7 +49,17 @@ class BioEntityTagger(object):
         idx = 0
         s = requests.Session()
         for dictionary_url in dictionary_urls:
-            dictionary = s.get(dictionary_url).json()
+            max_retry = 3
+            retry = 0
+            while retry < max_retry:
+                dictionary_request = s.get(dictionary_url)
+                if not dictionary_request.ok:
+                    time.sleep(5)
+                    retry+=1
+            if not dictionary_request.ok:
+                logging.error('cannot download dictionary %s, skipped'%dictionary_url)
+                continue
+            dictionary = dictionary_request.json()
             category, reference_db = dictionary_url.split('/')[-1].split('.')[0].split('_')[0].split('-')
             for element, ids in dictionary.items():
                 if len(element) > 2:
