@@ -517,49 +517,59 @@ class ToJSON(beam.DoFn):
 class ExtractConcepts(beam.DoFn):
     def process(self, element, *args, **kwargs):
         parsed_element = json.loads(element)
-        if 'concepts' in parsed_element['text_mined_entities']['nlp']:
-            for concept in parsed_element['text_mined_entities']['nlp']['concepts']:
-                yield json.dumps(dict(concept = concept,
-                                      pub_id = parsed_element['pub_id']),
+        try:
+            if 'concepts' in parsed_element['text_mined_entities']['nlp']:
+                for concept in parsed_element['text_mined_entities']['nlp']['concepts']:
+                    yield json.dumps(dict(concept = concept,
+                                          pub_id = parsed_element['pub_id']),
+                                     default=json_serialize,
+                                     sort_keys=True,
+                                     ensure_ascii=False,
+                                     indent=None,
+                                     )
+        except KeyError:
+            logging.exception('cannot extract concepts form article')
+
+class ExtractBioentities(beam.DoFn):
+    def process(self, element, *args, **kwargs):
+        parsed_element = json.loads(element)
+        try:
+            if 'tagged_entities' in parsed_element['text_mined_entities']['nlp']:
+                yield json.dumps(dict(entities = parsed_element['text_mined_entities']['nlp']['tagged_entities'],
+                                          pub_id = parsed_element['pub_id']),
                                  default=json_serialize,
                                  sort_keys=True,
                                  ensure_ascii=False,
                                  indent=None,
                                  )
-
-class ExtractBioentities(beam.DoFn):
-    def process(self, element, *args, **kwargs):
-        parsed_element = json.loads(element)
-        if 'tagged_entities' in parsed_element['text_mined_entities']['nlp']:
-            yield json.dumps(dict(entities = parsed_element['text_mined_entities']['nlp']['tagged_entities'],
-                                      pub_id = parsed_element['pub_id']),
-                             default=json_serialize,
-                             sort_keys=True,
-                             ensure_ascii=False,
-                             indent=None,
-                             )
+        except KeyError:
+            logging.exception('cannot extract bioentities form article')
 
 class ExtractTaggedText(beam.DoFn):
     def process(self, element, *args, **kwargs):
         parsed_element = json.loads(element)
-        if 'tagged_text' in parsed_element['text_mined_entities']['nlp']:
-            tagged_text = parsed_element['text_mined_entities']['nlp']['tagged_text']
-            try:
-                partitioned_text = title= tagged_text.partition('. ')
-                tagged_text_obj = dict(title= partitioned_text[0],
-                                       abstract = partitioned_text[2],
-                                       pub_id=parsed_element['pub_id'])
-            except:
-                tagged_text_obj = dict(title='',
-                                       abstract=tagged_text,
-                                       pub_id=parsed_element['pub_id']
-                                       )
-            yield json.dumps(tagged_text_obj,
-                             default=json_serialize,
-                             sort_keys=True,
-                             ensure_ascii=False,
-                             indent=None,
-                             )
+        try:
+
+            if 'tagged_text' in parsed_element['text_mined_entities']['nlp']:
+                tagged_text = parsed_element['text_mined_entities']['nlp']['tagged_text']
+                try:
+                    partitioned_text = title= tagged_text.partition('. ')
+                    tagged_text_obj = dict(title= partitioned_text[0],
+                                           abstract = partitioned_text[2],
+                                           pub_id=parsed_element['pub_id'])
+                except:
+                    tagged_text_obj = dict(title='',
+                                           abstract=tagged_text,
+                                           pub_id=parsed_element['pub_id']
+                                           )
+                yield json.dumps(tagged_text_obj,
+                                 default=json_serialize,
+                                 sort_keys=True,
+                                 ensure_ascii=False,
+                                 indent=None,
+                                 )
+        except KeyError:
+            logging.exception('cannot extract tagged text form article')
 
 class CleanPublication(beam.DoFn):
     def process(self, element, *args, **kwargs):

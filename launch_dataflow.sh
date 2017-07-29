@@ -10,7 +10,7 @@ python -m main \
   --input_updates gs://pubmed-medline/updatefiles/medline17n*.xml.gz \
   --output gs://medline-json/parsed/medline-base17 \
   --output_enriched gs://medline-json/analyzed/medline-base17 \
-  --max_num_workers 12 \
+  --max_num_workers 16 \
   --zone europe-west1-d
 
 #  --requirements_file requirements.txt \
