@@ -34,6 +34,10 @@ dictionary_urls= [
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/PUBLICATION-MESH.json",
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/TARGET-OPENTARGETS.json",
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/TECHNOLOGY-MESH.json"
+  "https://storage.googleapis.com/opentargets-bioentity-dictionary/GENE-LEXEBI.json",
+    # "https://storage.googleapis.com/opentargets-bioentity-dictionary/GENE70-LEXEBI.json",
+  "https://storage.googleapis.com/opentargets-bioentity-dictionary/DISEASE-LEXEBI.json"
+
 ]
 
 class BioEntityTagger(object):
