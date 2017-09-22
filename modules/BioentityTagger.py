@@ -34,12 +34,15 @@ dictionary_urls= [
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/PSICHIATRY-MESH.json",
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/PUBLICATION-MESH.json",
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/TARGET-OPENTARGETS.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/TECHNOLOGY-MESH.json"
+  "https://storage.googleapis.com/opentargets-bioentity-dictionary/TECHNOLOGY-MESH.json",
+  "https://storage.googleapis.com/opentargets-bioentity-dictionary/GENE-LEXEBI.json",
+  "https://storage.googleapis.com/opentargets-bioentity-dictionary/DISEASE-LEXEBI.json"
+
 ]
 
 class BioEntityTagger(object):
     separators_all = [' ', '.', ',', ';', ':', ')', ']', '(', '[', '{', '}', '/', '\\','"',"'", '?', '!', '<', '>', '+', '-']
-
+    common_words = ['at']
 
     def __init__(self, partial_match = False, ignorecase = True):
         self.A = ahocorasick.Automaton()
@@ -72,9 +75,11 @@ class BioEntityTagger(object):
                     else:
                         element_match = element_str
                     self.add_tag(element_match, idx, category, reference_db, [i.encode('utf-8') for i in ids], element, element_match)
-                    if '-' in element_match:
+                    if '-' in element_match :
                         element_match_without_dash =element_match.replace('-', '')
-                        self.add_tag(element_match_without_dash, idx, category, reference_db, [i.encode('utf-8') for i in ids], element, element_match_without_dash)
+                        # to avoid valid abbr like A-T matching common words - at
+                        if element_match_without_dash not in BioEntityTagger.common_words:
+                            self.add_tag(element_match_without_dash, idx, category, reference_db, [i.encode('utf-8') for i in ids], element, element_match_without_dash)
                         element_match_without_dash = element_match.replace('-', ' ')
                         self.add_tag(element_match_without_dash, idx, category, reference_db,
                                      [i.encode('utf-8') for i in ids], element, element_match_without_dash)
