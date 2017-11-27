@@ -1,6 +1,8 @@
 import ahocorasick
 
 import logging
+import string
+
 import requests
 import time
 from fuzzywuzzy import fuzz
@@ -10,31 +12,31 @@ from BioStopWords import DOMAIN_STOP_WORDS
 
 dictionary_urls= [
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/ANATOMY-MESH.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/ANTROPOLOGY-MESH.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/CHEMICAL-MESH.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/ANTROPOLOGY-MESH.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/CHEMICAL-MESH.json",
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/DIAGNOSTICS-MESH.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/DISCIPLINE-MESH.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/DISEASE-EPMC.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/DISEASE-MESH.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/DISCIPLINE-MESH.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/DISEASE-EPMC.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/DISEASE-MESH.json",
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/DISEASE-OPENTARGETS.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/GENE-EPMC.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/GENE-EPMC.json",
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/HEALTHCARE-MESH.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/HUMANITIES-MESH.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/INFORMATIONSCIENCE-MESH.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/LOC-MESH.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/NAMEDGROUP-MESH.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/HUMANITIES-MESH.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/INFORMATIONSCIENCE-MESH.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/LOC-MESH.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/NAMEDGROUP-MESH.json",
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/ORGANISM-MESH.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/PATHWAY-OPENTARGETS.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/PHENOTYPE-EPMC.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/PATHWAY-OPENTARGETS.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/PHENOTYPE-EPMC.json",
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/PROCESS-MESH.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/PROTEINCOMPLEX-CHEMBL.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/PROTEINCOMPLEX-COMPLEXPORTAL.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/PROTEINCOMPLEX-CORUM.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/PROTEINCOMPLEX-GO.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/PSICHIATRY-MESH.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/PUBLICATION-MESH.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/PROTEINCOMPLEX-CHEMBL.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/PROTEINCOMPLEX-COMPLEXPORTAL.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/PROTEINCOMPLEX-CORUM.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/PROTEINCOMPLEX-GO.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/PSICHIATRY-MESH.json",
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/PUBLICATION-MESH.json",
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/TARGET-OPENTARGETS.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/TECHNOLOGY-MESH.json"
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/TECHNOLOGY-MESH.json"
 ]
 
 class BioEntityTagger(object):
@@ -45,6 +47,7 @@ class BioEntityTagger(object):
         self.A = ahocorasick.Automaton()
         self.partial_match = partial_match
         self.ignorecase = ignorecase
+        self.tag_labels = {}
 
         idx = 0
         s = requests.Session()
@@ -54,7 +57,7 @@ class BioEntityTagger(object):
             while retry < max_retry:
                 dictionary_request = s.get(dictionary_url)
                 if not dictionary_request.ok:
-                    time.sleep(5)
+                    time.sleep(1)
                     retry+=1
                 else:
                     break
@@ -88,11 +91,16 @@ class BioEntityTagger(object):
         self.A.make_automaton()
 
     def add_tag(self,element_text,  idx, category, reference_db, ids, element, match):
-        unique_key = category + '|' + reference_db
+        unique_resource_key = category + '|' + reference_db
         category_insert = [category]
         reference_db_insert = [reference_db]
         ids_insert = [[i.encode('utf-8') for i in ids]]
         previous_annotation =  self.A.get(element_text, None)
+        for id_insert in ids_insert[0]:
+            unique_id = id_insert+'|'+ unique_resource_key
+            if unique_id not in self.tag_labels:
+                self.tag_labels[unique_id] = self.sanitize_string(element_text)
+
         if previous_annotation is None:
             self.A.add_word(element_text,
                             [idx, category_insert, reference_db_insert, ids_insert, element, match])
@@ -100,17 +108,21 @@ class BioEntityTagger(object):
             previous_keys = []
             for j in range(len(previous_annotation[1])):
                 previous_keys.append(previous_annotation[1][j] + '|' + previous_annotation[2][j])
-            if unique_key not in previous_keys:
+            if unique_resource_key not in previous_keys:
                 previous_annotation[1].extend(category_insert)
                 previous_annotation[2].extend(reference_db_insert)
                 previous_annotation[3].extend(ids_insert)#TODO: might need to merge addidional ids if the uniquekey is passed before
                 self.A.add_word(element_text,previous_annotation)
 
     def tag(self, text):
-        return self._tag(text, self.A, self.ignorecase)
+        return self._tag(text, self.A, self.ignorecase, self.tag_labels)
 
     @staticmethod
-    def _tag(text, automation, ignorecase = True):
+    def sanitize_string(s):
+        return s.translate(string.maketrans(' ','_'),string.punctuation)
+
+    @staticmethod
+    def _tag(text, automation, ignorecase = True, labels ={}):
         if isinstance(text, unicode):
             text_to_tag = text.encode('utf-8')
         else:
@@ -118,26 +130,32 @@ class BioEntityTagger(object):
         if ignorecase:
             text_to_tag = text_to_tag.lower()
         matches = []
-
         for end_index, (insert_order, category_list, reference_db_list, entity_id_list, original_value, match) in automation.iter(text_to_tag.lower()):
             start_index = end_index - len(match) + 1
             end_index+=1
+
             if (start_index == 0 or text_to_tag[start_index - 1] in BioEntityTagger.separators_all) and \
                     (end_index == len(text_to_tag) or text_to_tag[end_index] in BioEntityTagger.separators_all):
                 for j in range(len(category_list)):
                     category=category_list[j]
                     reference_db = reference_db_list[j]
                     entity_id = entity_id_list[j]
+                    if isinstance(entity_id, list):
+                        entity_id = entity_id[0]
+                    unique_entity_id = '|'.join([entity_id,category, reference_db])
+                    entity_label = ''
+                    if unique_entity_id in labels:
+                        entity_label = labels[unique_entity_id]
                     if category.endswith('-TOKEN'):
                         pre, post = original_value.split(match)[:2]
                         potential_match = text_to_tag[start_index:end_index + len(post)]
                         score = fuzz.token_sort_ratio(original_value, potential_match)
                         if score > 90:
                             tag = MatchedTag(match, start_index, end_index, category.replace('-TOKEN', ''), reference_db,
-                                             entity_id, original_value)
+                                             entity_id, original_value, entity_label)
                             matches.append(tag.__dict__)
                     else:
-                        tag = MatchedTag(match, start_index, end_index, category, reference_db, entity_id, original_value)
+                        tag = MatchedTag(match, start_index, end_index, category, reference_db, entity_id, original_value, entity_label)
                         matches.append(tag.__dict__)
             else:
                 pass
@@ -222,14 +240,14 @@ class BioEntityTagger(object):
         return []
 
     @staticmethod
-    def extend_tags_to_alternative_forms(text, extended_forms):
+    def extend_tags_to_alternative_forms(text, extended_forms, labels = {}):
         A = ahocorasick.Automaton()
         for text_to_match, payload in extended_forms.items():
             A.add_word(text_to_match.lower(),
                            [0, [payload['category']], [payload['reference_db']], [payload['reference']], payload['label'], text_to_match.lower()])
         A.make_automaton()
 
-        return BioEntityTagger._tag(text, A)
+        return BioEntityTagger._tag(text, A, labels = labels)
 
 
 
@@ -241,7 +259,9 @@ class MatchedTag(object):
                  category,
                  reference_db,
                  reference,
-                 label
+                 original_value,
+                 label,
+                 sentence = None
                  ):
         self.match = match
         self.start = start
@@ -249,7 +269,9 @@ class MatchedTag(object):
         self.category = category
         self.reference_db = reference_db
         self.reference = reference
+        self.original_value = original_value
         self.label = label
+        self.sentence = None
 
 
 # TODO: use inflection.table.ascii from SPECIALIST lexicon to enhance matching forms

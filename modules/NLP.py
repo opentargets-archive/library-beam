@@ -35,6 +35,7 @@ import en_depent_web_md
 from AbbreviationFinder import AbbreviationsParser
 from BioStopWords import DOMAIN_STOP_WORDS, COMMON_WORDS_CORPUS
 from modules.BioentityTagger import MatchedTag
+spacy.tokens.token.Token
 
 
 def create_tokenizer(nlp):
@@ -166,8 +167,12 @@ class AbstractNormalizer(object):
     }
 
     def normalize(self, text):
+        '''transform greek letters'''
         for key in self.greek_alphabet:
             text = text.replace(key, self.greek_alphabet[key])
+
+        '''remove multiple spaces'''
+        text = re.sub("\s\s+", " ", text)
         return unidecode(text)
 
 
@@ -460,10 +465,10 @@ class DocumentAnalysisSpacy(object):
     def process(self, document):
         tags = []
         if isinstance(document, Doc):
-            doc = document
-            abbreviations = self._abbreviations_finder.digest_as_dict(doc.text)
+            self.doc = document
+            abbreviations = self._abbreviations_finder.digest_as_dict(self.doc.text)
             if self._tagger is not None:
-                tags = self._tagger.tag(doc.text)
+                tags = self._tagger.tag(self.doc.text)
 
         elif isinstance(document, unicode):
             if self.normalize:
@@ -479,7 +484,7 @@ class DocumentAnalysisSpacy(object):
                     if short in document and not long in document:
                         document = document.replace(short, long)
             try:
-                doc = self.nlp(document)
+                self.doc = self.nlp(document)
             except:
                 self.logger.exception('Error parsing the document: %s' % document)
                 return [None, {}]
@@ -490,10 +495,12 @@ class DocumentAnalysisSpacy(object):
 
         concepts = []
         noun_phrases = []
-        for sentence in doc.sents:
+        self.analysed_sentences = []
+        for sentence in self.doc.sents:
             try:
-                analysed_sentence = SentenceAnalysisSpacy(sentence.text, self.nlp)
+                analysed_sentence = SentenceAnalysisSpacy(sentence.text, self.nlp, stopwords=self.stopwords)
                 analysed_sentence.analyse()
+                self.analysed_sentences.append(analysed_sentence)
                 concepts.extend(analysed_sentence.concepts)
                 noun_phrases.extend(analysed_sentence.noun_phrases)
             except:
@@ -504,7 +511,7 @@ class DocumentAnalysisSpacy(object):
 
         # clustered_np = self.cluster_np(noun_phrases)
         noun_phrase_counter = Counter()
-        lowered_text = doc.text.lower()
+        lowered_text = self.doc.text.lower()
         for i in noun_phrases:
             lowered_np = i.lower()
             noun_phrase_counter[lowered_np] = lowered_text.count(lowered_np)
@@ -529,15 +536,15 @@ class DocumentAnalysisSpacy(object):
         '''bioentity tags'''
 
         '''filter tags by POS'''
-        filtered_tags = []
+        self.filtered_tags = []
         for tag in tags:
-            tokens = self.get_tokens_in_range(doc, tag['start'], tag['end'])
+            tokens = self.get_tokens_in_range(self.doc, tag['start'], tag['end'])
             token_pos = set([i.pos_ for i in tokens])
             if token_pos & allowed_tag_pos:
                 # if tag['match'] in noun_phrases:
-                # print '%s >>>>> %s|%s  <<<<< %s'%(doc.text[(t['start'] - 10): t['start']], t['match'],
-                # t['category'], doc.text[t['end']:t['end'] +10])
-                filtered_tags.append(tag)
+                # print '%s >>>>> %s|%s  <<<<< %s'%(self.doc.text[(t['start'] - 10): t['start']], t['match'],
+                # t['category'], self.doc.text[t['end']:t['end'] +10])
+                self.filtered_tags.append(tag)
                 # else:
                 #     print tag['label'], tokens, token_pos
         '''filter out defined acronyms that don't agree'''
@@ -547,25 +554,25 @@ class DocumentAnalysisSpacy(object):
         lowered_abbreviations = {i.lower(): i for i in abbreviations}
         lowered_long_forms = {i.lower(): i for i in abbreviations.values()}
         inverted_abbreviations = {v.lower(): k for k, v in abbreviations.items()}
-        for tag in filtered_tags:
+        for tag in self.filtered_tags:
             matched_text = tag['match'].lower()
             if matched_text in lowered_abbreviations:
                 long_description = abbreviations[lowered_abbreviations[matched_text]]
-                if self._tagger.get_tag_by_match(filtered_tags, long_description.lower()):
+                if self._tagger.get_tag_by_match(self.filtered_tags, long_description.lower()):
                     acronym_filtered_tags.append(tag)
             else:
                 acronym_filtered_tags.append(tag)
             if matched_text in lowered_long_forms:
                 acronyms_to_extend[inverted_abbreviations[matched_text]] = tag
         if acronyms_to_extend:  # extend matches of long form to the short version if needed
-            acronym_tags = self._tagger.extend_tags_to_alternative_forms(document, acronyms_to_extend)
+            acronym_tags = self._tagger.extend_tags_to_alternative_forms(document, acronyms_to_extend, self._tagger.tag_labels)
             acronym_filtered_tags.extend(acronym_tags)
         acronyms_to_extend_lowered = [i.lower() for i in acronyms_to_extend]
-        filtered_tags = sorted(acronym_filtered_tags, key=lambda x: (x['start'], -x['end']))
+        self.filtered_tags = sorted(acronym_filtered_tags, key=lambda x: (x['start'], -x['end']))
 
         '''remove tag matching common words'''
         tags_to_remove = []
-        for i, tag in enumerate(filtered_tags):
+        for i, tag in enumerate(self.filtered_tags):
             if tag['category'] in SHORT_MATCH_CASE_SENSITIVE_CATEGORIES:
                 ''' use case sensive matching for short strings if the word is common'''
                 if len(tag['match']) < 7  and tag['match'] in COMMON_WORDS_CORPUS["brown_corpus"]:
@@ -581,25 +588,29 @@ class DocumentAnalysisSpacy(object):
                 if tag['match'] in COMMON_WORDS_CORPUS["brown_corpus"] and  (tag['match'] not in acronyms_to_extend_lowered):
                     tags_to_remove.append(i)
 
-        filtered_tags = [i for j, i in enumerate(filtered_tags) if j not in tags_to_remove]
+        self.filtered_tags = [i for j, i in enumerate(self.filtered_tags) if j not in tags_to_remove]
 
-        for i, sentence in enumerate(doc.sents):
-            tag_in_sentence = self._tagger.get_tags_in_range(filtered_tags, sentence.start_char, sentence.end_char)
+        for i, sentence in enumerate(self.doc.sents):
+            tag_in_sentence = self._tagger.get_tags_in_range(self.filtered_tags, sentence.start_char, sentence.end_char)
             tag_types = set([i['category'] for i in tag_in_sentence])
             if ('TARGET' in tag_types) and ('DISEASE' in tag_types):
-                filtered_tags.append(
+                self.filtered_tags.append(
                     MatchedTag('target-disease', sentence.start_char, sentence.end_char, 'TARGET&DISEASE',
-                               'OPENTARGETS', [''], '').__dict__)
+                               'OPENTARGETS', [''], '', '').__dict__)
 
-        return doc, \
+        embedding_text = {u'plain': self.to_text(),
+                          u'pos_tag': self.to_pos_tagged_text(),
+                          u'ent_tag': self.to_entity_tagged_text()}
+        return self.doc, \
                dict(chunks=noun_phrases,
                     recurring_chunks=noun_phrases_recurring,
                     top_chunks=noun_phrases_top,
                     abbreviations=[dict(short=k, long=v) for k, v in abbreviations.items()],
                     concepts=concepts,
-                    tagged_entities=filtered_tags,
-                    tagged_entities_grouped=self._tagger.group_matches_by_category_and_reference(filtered_tags),
-                    tagged_text=self._tagger.mark_tags_in_text(doc.text, filtered_tags))
+                    tagged_entities=self.filtered_tags,
+                    tagged_entities_grouped=self._tagger.group_matches_by_category_and_reference(self.filtered_tags),
+                    tagged_text=self._tagger.mark_tags_in_text(self.doc.text, self.filtered_tags),
+                    embedding_text=embedding_text)
 
     @staticmethod
     def get_tokens_in_range(doc, start, end):
@@ -641,6 +652,67 @@ class DocumentAnalysisSpacy(object):
         # print filtered_noun_phrases
         return filtered_noun_phrases
 
+    def to_pos_tagged_text(self, lower = True):
+        text = []
+        for sent in self.analysed_sentences:
+            text.append(sent.to_pos_tagged_text(lower = lower))
+        return u'\n'.join(text)
+
+    def to_text(self, lower = True):
+        text = []
+        for sent in self.analysed_sentences:
+            text.append(sent.to_text(lower = lower))
+        return u'\n'.join(text)
+
+    def to_entity_tagged_text(self,
+                              tags2skip = ['TARGET&DISEASE'],
+                              lower=True,
+                              use_pos = False):
+        token_tags = {}
+        token_refid = {}
+        token_labels = {}
+        for s_i, s in enumerate(self.doc.sents):
+            token_tags[s_i] = {}
+            token_refid[s_i] = {}
+            token_labels[s_i] = {}
+        for tag in self.filtered_tags:
+            for s_i, s in enumerate(self.doc.sents):
+                if tag['start']>= s.start_char and \
+                    tag['end'] <= s.end_char:
+                    tag['sentence'] = s_i
+                    analyzed_sentence_doc = self.analysed_sentences[s_i].doc
+                    tokens = self.get_tokens_in_range(analyzed_sentence_doc, tag['start'] - s.start_char, tag['end'] - s.start_char)
+                    if tag['category'] not in tags2skip:
+                        for token in tokens:
+                            if token.i  not in token_tags[s_i]:
+                                token_tags[s_i][token.i] = []
+                            token_tags[s_i][token.i].append(tag['category'])
+                            if token.i not in token_refid[s_i]:
+                                ref = tag['reference']
+                                if '/' in ref:#workaround for uris
+                                    ref=ref.split('/')[-1]
+                                token_refid[s_i][token.i] = ref
+                            if token.i  not in token_labels[s_i]:
+                                token_labels[s_i][token.i] = unicode(tag['label'], 'utf-8')
+                    break
+        # for s_i, s in enumerate(self.doc.sents):
+        #     analyzed_sentence_doc = self.analysed_sentences[s_i].doc
+        #     for token in analyzed_sentence_doc:
+        #         if token.i not in token_tags[s_i]:
+        #             token_tags[s_i][token.i] = [token.pos_]
+
+        text = []
+        for s_i, sent in enumerate(self.analysed_sentences):
+            sent_text = sent.to_ent_and_pos_tagged_text(ents = token_tags[s_i],
+                                                        ref_ids = token_refid[s_i],
+                                                        labels = token_labels[s_i],
+                                                        lower=lower,
+                                                        use_pos=use_pos)
+            text.append(sent_text.encode('ascii',errors='ignore'))
+        return u'\n'.join(text)
+
+
+
 
 class SentenceAnalysisSpacy(object):
     def __init__(self,
@@ -648,11 +720,13 @@ class SentenceAnalysisSpacy(object):
                  nlp,
                  abbreviations=None,
                  normalize=True,
-                 tagger=None):
+                 tagger=None,
+                 stopwords = []):
         self.logger = logging.getLogger(__name__)
         self._normalizer = AbstractNormalizer()
         self._abbreviations_finder = AbbreviationsParser()
         self._tagger = tagger
+        self.stopwords = stopwords
 
         self.tags = []
         self.abbreviations = {}
@@ -700,7 +774,7 @@ class SentenceAnalysisSpacy(object):
         return False
 
     def get_alternative_subjects(self, tok):
-        '''given a token, that is a subject of a verb, extends to other possible subjects in the left part of the 
+        '''given a token, that is a subject of a verb, extends to other possible subjects in the left part of the
         relation'''
 
         '''get objects in subtree of the subject to be related to objects in the right side of the verb #risk'''
@@ -766,6 +840,8 @@ class SentenceAnalysisSpacy(object):
         :return:
         '''
         allowed_pos = [NOUN, ADJ, PUNCT, PROPN]
+        if 'Parkinson' in tok.text:
+            pass
         allowed_dep = ["nsubj", "nsubjpass", "csubj", "csubjpass", "agent", "expl", "dobj", "attr", "oprd", "pobj",
                        # "conj",
                        "compound", "amod", "meta", "npadvmod", "nmod",
@@ -817,7 +893,7 @@ class SentenceAnalysisSpacy(object):
             return " ".join(['"%s"' % tok.orth_, tok.tag_, tok.pos_, tok.dep_])
 
         if node.n_lefts + node.n_rights > 0:
-            return Tree(tok_format(node), [self.to_nltk_tree(child) for child in node.children])
+            return nltk.Tree(tok_format(node), [self.to_nltk_tree(child) for child in node.children])
         else:
             return tok_format(node)
 
@@ -825,7 +901,7 @@ class SentenceAnalysisSpacy(object):
         for t in self.sentence:
             if t.dep_ == 'ROOT':
                 tree = self.to_nltk_tree(t)
-                if isinstance(tree, Tree):
+                if isinstance(tree, nltk.Tree):
                     tree.pretty_print(stream=self)
 
     def get_dependent_obj(self, tok, verb_path):
@@ -880,7 +956,7 @@ class SentenceAnalysisSpacy(object):
                 pass
 
     def collapse_noun_phrases_by_syntax(self):
-        allowed_conjunction_dep = [prep]
+        not_allowed_conjunction_dep = [prep]
         for token in self.sentence:
             if token.pos in [NOUN, PROPN]:
                 extended = self.get_extended_token(token)
@@ -889,7 +965,7 @@ class SentenceAnalysisSpacy(object):
                 siblings = list(token.head.children)
                 span_range = [token.i, token.i]
                 for sibling in siblings:
-                    if sibling.dep == token.dep:  # or sibling.dep in allowed_conjunction_dep:
+                    if sibling.dep == token.dep  and sibling.dep_ in not_allowed_conjunction_dep:
                         if sibling.i > token.i:
                             span_range[1] = sibling.i
                         elif sibling.i < token.i:
@@ -955,3 +1031,53 @@ class SentenceAnalysisSpacy(object):
         '''needed to print nltk graph to logging'''
         if message != '\n':
             self.logger.debug(message)
+
+    def to_pos_tagged_text(self, lower = True):
+        text = []
+        for token in self.doc:
+            if token.text and (token.pos != PUNCT and token.text.lower() not in self.stopwords):
+                if lower:
+                    text.append(token.text.strip().replace(u' ', u'_').lower()+u'|'+token.pos_)
+                else:
+                    text.append(token.text.strip().replace(u' ', u'_')+u'|'+token.pos_)
+        return u' '.join(text)
+
+    def to_text(self, lower = True):
+        text = []
+        for token in self.doc:
+            if token.text and (token.pos != PUNCT and token.text.lower() not in self.stopwords):
+                text_to_append =  token.text.strip().replace(u' ', u'_')
+                if lower:
+                    text_to_append = text_to_append.lower()
+                text.append(text_to_append)
+        return u' '.join(text)
+
+    def to_ent_and_pos_tagged_text(self,
+                                   ents,
+                                   ref_ids,
+                                   labels,
+                                   lower=True,
+                                   use_pos = False):
+        text = []
+        for token in self.doc:
+            if token.text and (token.pos != PUNCT and token.text.lower() not in self.stopwords):
+                pos = token.pos_
+                if token.i in ref_ids:
+                    token_text = ref_ids[token.i]
+                else:
+                    token_text = token.text.strip()
+                if lower:
+                    token_text = token_text.lower()
+                token_text= token_text.replace(u' ', u'_')
+                if use_pos:
+                    token_text+=u'|'+pos
+                if token.i in ents:
+                    ent = u'_'.join(ents[token.i])
+                    token_text+=u'|'+ent
+                if token.i in labels:
+                    # try:
+                        token_text+=u'|'+labels[token.i]
+                    # except UnicodeDecodeError:
+                    #     pass#TODO: handle non ascii labels
+                text.append(token_text)
+        return u' '.join(text)

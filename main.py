@@ -152,10 +152,10 @@ class _MedlineTextSource(_TextSource):
 
 class ReadMedlineFiles(beam.PTransform):
     """A PTransform for reading text files.
-  
+
     Parses a text file as newline-delimited elements, by default assuming
     UTF-8 encoding. Supports newline delimiters '\\n' and '\\r\\n'.
-  
+
     This implementation only supports reading text encoded using UTF-8 or ASCII.
     This does not support other encodings such as UTF-16 or UTF-32.
     """
@@ -171,7 +171,7 @@ class ReadMedlineFiles(beam.PTransform):
             skip_header_lines=0,
             **kwargs):
         """Initialize the ReadFromText transform.
-    
+
         Args:
           file_pattern: The file path to read from as a local file path or a GCS
             ``gs://`` path. The path can contain glob characters
@@ -257,19 +257,21 @@ def parse_medline_xml(record, filename):
 
                         publication['mesh_terms'].append(mesh_heading)
 
-        elif medline.tag == 'DeleteCitation':
+        elif medline.tag == 'DeleteCitation':#collect deleted citations
             publication['delete_pmids'] = list()
             for deleted_pmid in medline.getchildren():
                 publication['delete_pmids'].append(deleted_pmid.text)
 
         publication['filename'] = filename
 
+
         # publication['text_analyzers'] = self.analyzers
-        if 'delete_pmids' in publication and publication['delete_pmids']:
+        if 'delete_pmids' in publication and publication['delete_pmids']:#yield empty objects for each deleted citations
             for pmid in publication['delete_pmids']:
                 '''update parent and analyzed child publication with empty values'''
                 yield dict(pub_id=pmid,
                            filename=publication.get('filename'),
+                           is_deleted = True
                            )
         else:
             yield dict(pub_id=publication['pmid'],
@@ -302,7 +304,7 @@ def parse_medline_xml(record, filename):
             if pmid_end:
                 pmid = record[pmid_end-8:pmid_end]
         except:
-            pass
+            print e
         logging.error("Error parsing XML file {} - medline record {}".format(filename, pmid), e.message)
 
 
@@ -389,7 +391,7 @@ class MedlineXMLParser(beam.DoFn):
     def process(self, element, *args, **kwargs):
         rec, file_name = element
         for parsed_record in parse_medline_xml(rec, file_name):
-            yield parsed_record
+            yield parsed_record['pub_id'],parsed_record
 
 
 class TagBioEntity(beam.DoFn):
@@ -408,7 +410,7 @@ class TagBioEntity(beam.DoFn):
 
     def start_bundle(self):
         """Called before a bundle of elements is processed on a worker.
-    
+
         Elements to be processed are split into bundles and distributed
         to workers. Before a worker calls process() on the first element
         of its bundle, it calls this method.
@@ -507,12 +509,28 @@ class NLPAnalysis(beam.DoFn):
 
 class ToJSON(beam.DoFn):
     def process(self, element, *args, **kwargs):
-        yield json.dumps(element,
-                         default=json_serialize,
-                         sort_keys=True,
-                         ensure_ascii=False,
-                         indent=None,
-                         )
+        try:
+            yield json.dumps(element,
+                             default=json_serialize,
+                             sort_keys=True,
+                             ensure_ascii=False,
+                             indent=None,
+                             )
+        except UnicodeDecodeError:
+            logging.error('cannot serialize object to json because of non ascii chars')
+            nltk.pprint(element)
+
+class GetLatestVersion(beam.DoFn):
+    ''' gets a lsit of records grouped by PubmedID and yield its latest version
+    according to the file name it was read from'''
+    def process(self, element, *args, **kwargs):
+        pmid, versions = element
+        versions = list(versions)#workaround for dataflow runner
+        if versions:
+            if len(versions)>1:
+                yield sorted(versions, key=lambda x: x['filename'])[-1]
+            else:
+                yield versions[0]
 
 class ExtractConcepts(beam.DoFn):
     def process(self, element, *args, **kwargs):
@@ -657,34 +675,17 @@ def run(argv=None):
 
 
             parsed_medline_articles = medline_articles | 'ParseXMLtoDict' >> beam.ParDo(MedlineXMLParser())
-            # parsed_medline_articles | 'ConsumeJSON' >> beam.ParDo(Consume())
 
+            medline_articles_grouped_by_id = parsed_medline_articles | 'GroupByPMID' >> beam.GroupByKey()
 
-            # json_medline_articles = parsed_medline_articles | 'MedlineToJSON' >> beam.ParDo(ToJSON())
-            #
-            # #
-            # json_medline_articles | 'WriteJSONToGS' >> WriteToText(known_args.output, file_name_suffix='.json.gz')
-            #
-            # json_medline_articles |  'WriteMedlneJSONToBQ' >> beam.io.Write(
-            #                                                         beam.io.BigQuerySink(
-            #                                                             "open-targets:medline.papers",
-            #                                                             schema=bq_table_schema,
-            #                                                             create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
-            #                                                             write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE))
+            unique_medline_articles = medline_articles_grouped_by_id | 'SortByFilename' >> beam.ParDo(GetLatestVersion())
 
-
-            enriched_articles = parsed_medline_articles | 'NLPAnalysis' >> beam.ParDo(NLPAnalysis())
+            enriched_articles = unique_medline_articles | 'NLPAnalysis' >> beam.ParDo(NLPAnalysis())
 
             json_enriched_medline_articles = enriched_articles | 'EnrichedMedlineToJSON' >> beam.ParDo(ToJSON())
 
             json_enriched_medline_articles | 'WriteEnrichedJSONToGS' >> WriteToText(known_args.output_enriched, file_name_suffix='_enriched.json.gz')
 
-            # medline_articles | WriteToBigQuery(
-            #                                 "open-targets:medline.papers",  # known_args.output_table,
-            #                                 schema=bq_table_schema,
-            #                                 create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
-            #                                 write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE)
-            #
         elif known_args.input_enriched:
 
             json_enriched_medline_articles = p | 'GetEnrichedArticles' >> ReadFromText(known_args.input_enriched)
