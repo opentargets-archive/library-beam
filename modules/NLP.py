@@ -4,6 +4,7 @@ import logging
 import re
 import string
 from collections import Counter
+from copy import copy, deepcopy
 
 import nltk
 from sklearn.feature_extraction.stop_words import ENGLISH_STOP_WORDS
@@ -82,7 +83,7 @@ SUBJECTS = ["nsubj", "nsubjpass", "csubj", "csubjpass", "agent", "expl", "meta"]
 OBJECTS = ["dobj", "dative", "attr", "oprd", "pobj", "attr", "conj", "compound"]
 
 ANY_NOUN = SUBJECTS + OBJECTS + ['compound']
-SHORT_MATCH_CASE_SENSITIVE_CATEGORIES = ['TARGET', 'CHEMICAL', 'GENE', 'PROTEINCOMPLEX']
+SHORT_MATCH_CASE_SENSITIVE_CATEGORIES = ['TARGET', 'DRUG' 'CHEMICAL', 'GENE', 'PROTEINCOMPLEX']
 NOISY_CATEGORIES = []#['DISEASE',]
 
 
@@ -596,21 +597,26 @@ class DocumentAnalysisSpacy(object):
         for i, sentence in enumerate(self.doc.sents):
             tag_in_sentence = self._tagger.get_tags_in_range(self.filtered_tags, sentence.start_char, sentence.end_char)
             tag_types = set([i['category'] for i in tag_in_sentence])
-            if ('TARGET' in tag_types) and ('DISEASE' in tag_types):
+            if ('GENE' in tag_types) and ('DISEASE' in tag_types):
                 self.filtered_tags.append(
                     MatchedTag('target-disease', sentence.start_char, sentence.end_char, 'TARGET&DISEASE',
                                'OPENTARGETS', [''], '', '').__dict__)
 
-        '''store tags in concepts subjects and objects'''
+        '''store tags for  subjects and objects in concepts'''
         sentences_start_chars = [sent.start_char for sent in self.doc.sents]
         for concept in concepts:
-            sbj_start = sentences_start_chars[concept['sentence']]+concept['subject_range']['start']
+            sbj_start = sentences_start_chars[concept['sentence']] + concept['subject_range']['start']
             sbj_end = sentences_start_chars[concept['sentence']] + concept['subject_range']['end']
             sbj_tags = self._tagger.get_tags_in_range(self.filtered_tags,
                                                           sbj_start,
                                                           sbj_end)
             if sbj_tags:
-                concept['subject_tags'] = sbj_tags
+                concept['subject_tags'] = [deepcopy(tag) for tag in sbj_tags]
+                for tag in concept['subject_tags']:
+                    tag['start']-=sentences_start_chars[concept['sentence']]
+                    tag['end'] -= sentences_start_chars[concept['sentence']]
+
+
 
             obj_start = sentences_start_chars[concept['sentence']] + concept['object_range']['start']
             obj_end = sentences_start_chars[concept['sentence']] + concept['object_range']['end']
@@ -618,7 +624,10 @@ class DocumentAnalysisSpacy(object):
                                                           obj_start,
                                                           obj_end)
             if obj_tags:
-                concept['object_tags'] = obj_tags
+                concept['object_tags'] = [deepcopy(tag) for tag in obj_tags]
+                for tag in concept['object_tags']:
+                    tag['start'] -= sentences_start_chars[concept['sentence']]
+                    tag['end'] -= sentences_start_chars[concept['sentence']]
 
         embedding_text = {u'plain': self.to_text(),
                           u'pos_tag': self.to_pos_tagged_text(),

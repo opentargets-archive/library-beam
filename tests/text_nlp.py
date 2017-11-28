@@ -451,10 +451,16 @@ class SpacyDocumentNLPTestCase(unittest.TestCase):
         abstracts_analyzer = DocumentAnalysisSpacy(nlp=self.nlp,
                                                    tagger=BioEntityTagger())
         digested_abstract = abstracts_analyzer.digest(chromosome8p_text)
-        for concept in digested_abstract['concepts']:
-            if 'ADRA1A' in concept['object']:
-                tags_types = [t['type'] for t in concept['object_tags']]
-                self.assertIn('TARGET',tags_types)
+        concepts = [concept for concept in digested_abstract['concepts'] if 'PPP3CC' in concept['object']]
+        self.assertNotEquals(concepts,[])
+        for concept in concepts:
+            tags_types = [t['category'] for t in concept['object_tags']]
+            self.assertIn('TARGET',tags_types)
+            for tag in concept['object_tags']:
+
+                matched_text = tag['match'].lower()
+                positions_text = concept['sentence_text'][tag['start']:tag['end']].lower()
+                self.assertEqual(matched_text, positions_text)
 
     def test_obama(self):
         '''compare with https://github.com/GoogleCloudPlatform/python-docs-samples/tree/master/language

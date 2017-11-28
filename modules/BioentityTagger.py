@@ -20,7 +20,7 @@ dictionary_urls= [
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/HEALTHCARE-MESH.json",
   # "https://storage.googleapis.com/opentargets-bioentity-dictionary/HUMANITIES-MESH.json",
   # "https://storage.googleapis.com/opentargets-bioentity-dictionary/INFORMATIONSCIENCE-MESH.json",
-  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/LOC-MESH.json",
+  "https://storage.googleapis.com/opentargets-bioentity-dictionary/LOC-MESH.json",
   # "https://storage.googleapis.com/opentargets-bioentity-dictionary/NAMEDGROUP-MESH.json",
   "https://storage.googleapis.com/opentargets-bioentity-dictionary/ORGANISM-MESH.json",
   # "https://storage.googleapis.com/opentargets-bioentity-dictionary/PATHWAY-OPENTARGETS.json",
@@ -32,10 +32,12 @@ dictionary_urls= [
   # "https://storage.googleapis.com/opentargets-bioentity-dictionary/PROTEINCOMPLEX-GO.json",
   # "https://storage.googleapis.com/opentargets-bioentity-dictionary/PSICHIATRY-MESH.json",
   # "https://storage.googleapis.com/opentargets-bioentity-dictionary/PUBLICATION-MESH.json",
-  "https://storage.googleapis.com/opentargets-bioentity-dictionary/TARGET-OPENTARGETS.json",
+  "https://storage.googleapis.com/opentargets-bioentity-dictionary/GENE-OPENTARGETS.json",
   # "https://storage.googleapis.com/opentargets-bioentity-dictionary/TECHNOLOGY-MESH.json"
   # "https://storage.googleapis.com/opentargets-bioentity-dictionary/GENE-LEXEBI.json",
-  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/DISEASE-LEXEBI.json"
+  # "https://storage.googleapis.com/opentargets-bioentity-dictionary/DISEASE-LEXEBI.json",
+  "https://storage.googleapis.com/opentargets-bioentity-dictionary/PHENOTYPE-HPO.json",
+  "https://storage.googleapis.com/opentargets-bioentity-dictionary/DRUG-CHEMBL.json",
 
 ]
 
@@ -212,9 +214,13 @@ class BioEntityTagger(object):
             tagged_abstract = ChangeCollector(text_to_tag)
             for i, tag in enumerate(
                     sorted(matches, key=lambda x: (x['start'], -x['end']))):
+                if isinstance(tag['reference'], (list, tuple)):
+                    tag_reference = '|'.join(tag['reference'])
+                else:
+                    tag_reference = tag['reference']
                 tagged_abstract.add_change(tag['start'], tag['start'],
                                            '<mark-%s data-entity="%s" reference-db="%s"  reference="%s">' % (
-                                           str(i), tag['category'],tag['reference_db'], '|'.join(tag['reference'])))
+                                           str(i), tag['category'],tag['reference_db'], tag_reference))
                 tagged_abstract.add_change(tag['end'], tag['end'], '</mark-%s>' % str(i))
             tagged_abstract = '<div  class="entities">%s</div></br>' % tagged_abstract.get_changed()
         except UnicodeDecodeError:
