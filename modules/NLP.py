@@ -496,12 +496,14 @@ class DocumentAnalysisSpacy(object):
         concepts = []
         noun_phrases = []
         self.analysed_sentences = []
-        for sentence in self.doc.sents:
+        for si,sentence in enumerate(self.doc.sents):
             try:
                 analysed_sentence = SentenceAnalysisSpacy(sentence.text, self.nlp, stopwords=self.stopwords)
                 analysed_sentence.analyse()
                 self.analysed_sentences.append(analysed_sentence)
-                concepts.extend(analysed_sentence.concepts)
+                for concept in analysed_sentence.concepts:
+                    concept['sentence']=si
+                    concepts.append(concept)
                 noun_phrases.extend(analysed_sentence.noun_phrases)
             except:
                 self.logger.exception('Error parsing the sentence: %s' % sentence.text)
@@ -590,6 +592,7 @@ class DocumentAnalysisSpacy(object):
 
         self.filtered_tags = [i for j, i in enumerate(self.filtered_tags) if j not in tags_to_remove]
 
+        '''Tag TARGET&DISEASE sentences for open targets'''
         for i, sentence in enumerate(self.doc.sents):
             tag_in_sentence = self._tagger.get_tags_in_range(self.filtered_tags, sentence.start_char, sentence.end_char)
             tag_types = set([i['category'] for i in tag_in_sentence])
@@ -597,6 +600,25 @@ class DocumentAnalysisSpacy(object):
                 self.filtered_tags.append(
                     MatchedTag('target-disease', sentence.start_char, sentence.end_char, 'TARGET&DISEASE',
                                'OPENTARGETS', [''], '', '').__dict__)
+
+        '''store tags in concepts subjects and objects'''
+        sentences_start_chars = [sent.start_char for sent in self.doc.sents]
+        for concept in concepts:
+            sbj_start = sentences_start_chars[concept['sentence']]+concept['subject_range']['start']
+            sbj_end = sentences_start_chars[concept['sentence']] + concept['subject_range']['end']
+            sbj_tags = self._tagger.get_tags_in_range(self.filtered_tags,
+                                                          sbj_start,
+                                                          sbj_end)
+            if sbj_tags:
+                concept['subject_tags'] = sbj_tags
+
+            obj_start = sentences_start_chars[concept['sentence']] + concept['object_range']['start']
+            obj_end = sentences_start_chars[concept['sentence']] + concept['object_range']['end']
+            obj_tags = self._tagger.get_tags_in_range(self.filtered_tags,
+                                                          obj_start,
+                                                          obj_end)
+            if obj_tags:
+                concept['object_tags'] = obj_tags
 
         embedding_text = {u'plain': self.to_text(),
                           u'pos_tag': self.to_pos_tagged_text(),
@@ -721,7 +743,7 @@ class SentenceAnalysisSpacy(object):
                  abbreviations=None,
                  normalize=True,
                  tagger=None,
-                 stopwords = []):
+                 stopwords = set()):
         self.logger = logging.getLogger(__name__)
         self._normalizer = AbstractNormalizer()
         self._abbreviations_finder = AbbreviationsParser()
@@ -822,7 +844,7 @@ class SentenceAnalysisSpacy(object):
         for vchild in v.children:
             if vchild.dep in verb_modifiers:
                 verb_text += ' ' + vchild.text.lower()
-        return 'to ' + verb_text, verb_path, lefts
+        return verb_text, verb_path, lefts
 
     def get_verb_path_from_ancestors(self, tok):
         '''
@@ -1004,18 +1026,26 @@ class SentenceAnalysisSpacy(object):
                         dependend_objects = self.get_dependent_obj(r, verb_path)
                         for do in dependend_objects:
                             noun_phrases.append(do)
-                            self.concepts.append(dict(
+                            verb_subtree =self.doc[v.left_edge.i: v.right_edge.i + 1].text
+                            concept =dict(
                                 subject=any_subject.text,
+                                subject_range = dict(start=any_subject.idx,
+                                                     end=any_subject.idx + len(any_subject.text)),
                                 object=do.text,
+                                object_range = dict(start=do.idx,
+                                                    end=do.idx + len(do.text)),
                                 verb=verb_text,
                                 verb_path=[i.text for i in verb_path],
-                                verb_subtree=self.doc[v.left_edge.i: v.right_edge.i + 1].text,
-                                subj_ver='%s -> %s' % (any_subject.text, verb_text),
-                                ver_obj='%s -> %s' % (verb_text, do.text),
-                                concept='%s -> %s -> %s' % (any_subject.text, verb_text, do.text),
+                                # subj_ver='%s -> %s' % (any_subject.text, verb_text),
+                                # ver_obj='%s -> %s' % (verb_text, do.text),
+                                # concept='%s -> %s -> %s' % (any_subject.text, verb_text, do.text),
                                 negated=self.isNegated(v) or self.isNegated(any_subject) or \
-                                        self.isNegated(do)
-                            ))
+                                        self.isNegated(do),
+                                sentence_text = self.doc.text
+                            )
+                            if verb_subtree != self.doc.text:
+                                concept['verb_subtree'] = verb_subtree
+                            self.concepts.append(concept)
         self.noun_phrases = list(set(noun_phrases))
         # self.logger.info(self.noun_phrases)
         # for c in self.concepts:
