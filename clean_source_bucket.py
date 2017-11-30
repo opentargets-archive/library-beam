@@ -11,7 +11,10 @@ def delete_all_output():
         if blob_ref.name.endswith('.json.gz') and \
                 (blob_ref.name.startswith('parsed/medline-base17')  or
                 blob_ref.name.startswith('analyzed/medline-base17') or
-                blob_ref.name.startswith('splitted/medline-base17')) :
+                blob_ref.name.startswith('splitted/medline-base17') or
+                blob_ref.name.startswith('test/analyzed/medline-base17') or
+                blob_ref.name.startswith('test/splitted/medline-base17')or
+                blob_ref.name.startswith('test/parsed/medline-base17')) :
             blob = bucket.get_blob(blob_ref.name)
             blob.delete()
             print 'deleted', i, blob_ref.name

@@ -5,10 +5,10 @@ python -m main \
   --runner DataflowRunner \
   --temp_location gs://opentargets-library-tmp/temp \
   --setup_file ./setup.py \
-  --worker_machine_type n1-highmem-16 \
+  --worker_machine_type n1-highmem-8 \
   --input_enriched gs://medline-json/analyzed/medline-base17*_enriched.json.gz \
   --output_splitted gs://medline-json/splitted/medline-base17 \
-  --max_num_workers 16 \
+  --max_num_workers 32 \
   --zone europe-west1-d
 
 #  --requirements_file requirements.txt \

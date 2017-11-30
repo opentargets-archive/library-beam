@@ -5,7 +5,7 @@ python -m main \
   --runner DataflowRunner \
   --temp_location gs://opentargets-library-tmp/temp \
   --setup_file ./setup.py \
-  --worker_machine_type n1-highmem-32 \
+  --worker_machine_type n1-highmem-16 \
   --input_baseline gs://pubmed-medline/baseline/medline17n*.xml.gz \
   --input_updates gs://pubmed-medline/updatefiles/medline17n*.xml.gz \
   --output gs://medline-json/parsed/medline-base17 \

@@ -1,6 +1,6 @@
 {
   "settings": {
-    "number_of_shards": 3,
+    "number_of_shards": 10,
     "number_of_replicas": 0,
     "analysis": {
       "filter": {
@@ -825,32 +825,6 @@
         }
       ]
     },
-    "publication-analysis-spacy": {
-      "_all": {
-        "enabled": true
-      },
-      "_parent": {
-        "type": "publication",
-        "fielddata": {
-          "loading": "eager_global_ordinals"
-        }
-      },
-      "_routing": {
-        "required": true
-      },
-      "dynamic_templates": [
-        {
-          "string_fields": {
-            "mapping": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "match": "*",
-            "match_mapping_type": "string"
-          }
-        }
-      ]
-    },
     "publication": {
       "_all": {
         "enabled": true
@@ -931,6 +905,10 @@
               "type": "keyword",
               "ignore_above": 256
             },
+            "name_id": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
             "registryNumber": {
               "type": "keyword",
               "ignore_above": 256
@@ -952,24 +930,6 @@
         "doi": {
           "type": "keyword",
           "ignore_above": 256
-        },
-        "keywords": {
-          "type": "keyword",
-          "ignore_above": 256
-        },
-        "text_mined_entities": {
-          "type": "object",
-          "properties": {
-            "nlp": {
-              "type": "object",
-              "properties": {
-                "tagged_text": {
-                  "type": "string",
-                  "index": "no"
-                }
-              }
-            }
-          }
         },
         "filename": {
           "type": "keyword",
@@ -1009,6 +969,10 @@
             }
           }
         },
+        "keywords": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
         "mesh_headings": {
           "properties": {
             "id": {
@@ -1038,6 +1002,37 @@
           "analyzer": "english",
           "eager_global_ordinals": true,
           "fielddata": true
+        },
+        "text_mined_entities": {
+          "type": "object",
+          "properties": {
+            "nlp": {
+              "type": "object",
+              "properties": {
+                "tagged_text": {
+                  "type": "string",
+                  "index": "no"
+                },
+                "embedding_text": {
+                  "type": "object",
+                  "properties": {
+                    "ent_tag": {
+                      "type": "string",
+                      "index": "no"
+                    },
+                    "plain": {
+                      "type": "string",
+                      "index": "no"
+                    },
+                    "pos_tag": {
+                      "type": "string",
+                      "index": "no"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
