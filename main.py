@@ -365,9 +365,20 @@ def parse_article_info(article, publication):
             for author in e.Author:
                 author_dict = dict()
                 for e in author.getchildren():
-                    if e.tag != 'AffiliationInfo':
+                    if e.tag == 'AffiliationInfo':
+                        aff = list(e.getiterator('Affiliation'))
+                        if aff:
+                            author_dict['Affiliation'] = aff[0].text
+                    else:
                         author_dict[e.tag] = e.text
 
+                if 'LastName' in author_dict:
+                    author_dict['short_name'] = author_dict['LastName']
+                    author_dict['full_name'] = author_dict['LastName']
+                    if 'Initials' in author_dict:
+                        author_dict['short_name'] += ' '+author_dict['Initials']
+                    if 'ForeName' in author_dict:
+                        author_dict['full_name'] += ' '+author_dict['ForeName']
                 publication['authors'].append(author_dict)
 
         if e.tag == 'Pagination':
