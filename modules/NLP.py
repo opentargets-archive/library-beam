@@ -551,7 +551,7 @@ class DocumentAnalysisSpacy(object):
                 # else:
                 #     print tag['label'], tokens, token_pos
         '''filter out defined acronyms that don't agree'''
-        #TODO: if the long ofrm is tagged, search for the short form as well
+        #TODO: if the long form is tagged, search for the short form as well
         acronym_filtered_tags = []
         acronyms_to_extend = {}
         lowered_abbreviations = {i.lower(): i for i in abbreviations}
@@ -602,7 +602,7 @@ class DocumentAnalysisSpacy(object):
                     MatchedTag('target-disease', sentence.start_char, sentence.end_char, 'TARGET&DISEASE',
                                'OPENTARGETS', [''], '', '').__dict__)
 
-        '''store tags for  subjects and objects in concepts'''
+        '''store tags for subjects and objects in concepts grouped by their category'''
         sentences_start_chars = [sent.start_char for sent in self.doc.sents]
         for concept in concepts:
             sbj_start = sentences_start_chars[concept['sentence']] + concept['subject_range']['start']
@@ -611,11 +611,15 @@ class DocumentAnalysisSpacy(object):
                                                           sbj_start,
                                                           sbj_end)
             if sbj_tags:
-                concept['subject_tags'] = [deepcopy(tag) for tag in sbj_tags]
-                for tag in concept['subject_tags']:
+                concept['subject_tags']={}
+                sbj_tags_sent_idx = [deepcopy(tag) for tag in sbj_tags]
+                for tag in sbj_tags_sent_idx:
                     tag['start']-=sentences_start_chars[concept['sentence']]
                     tag['end'] -= sentences_start_chars[concept['sentence']]
-
+                    tag_class = tag['category']
+                    if tag_class not in concept['subject_tags']:
+                        concept['subject_tags'][tag_class]=[]
+                    concept['subject_tags'][tag_class].append(tag)
 
 
             obj_start = sentences_start_chars[concept['sentence']] + concept['object_range']['start']
@@ -624,10 +628,15 @@ class DocumentAnalysisSpacy(object):
                                                           obj_start,
                                                           obj_end)
             if obj_tags:
-                concept['object_tags'] = [deepcopy(tag) for tag in obj_tags]
-                for tag in concept['object_tags']:
+                concept['object_tags']={}
+                obj_tags_sent_idx = [deepcopy(tag) for tag in obj_tags]
+                for tag in obj_tags_sent_idx:
                     tag['start'] -= sentences_start_chars[concept['sentence']]
                     tag['end'] -= sentences_start_chars[concept['sentence']]
+                    tag_class = tag['category']
+                    if tag_class not in concept['object_tags']:
+                        concept['object_tags'][tag_class] = []
+                    concept['object_tags'][tag_class].append(tag)
 
         embedding_text = {u'plain': self.to_text(),
                           u'pos_tag': self.to_pos_tagged_text(),
