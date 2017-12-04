@@ -578,7 +578,8 @@ class DocumentAnalysisSpacy(object):
         for i, tag in enumerate(self.filtered_tags):
             if tag['category'] in SHORT_MATCH_CASE_SENSITIVE_CATEGORIES:
                 ''' use case sensive matching for short strings if the word is common'''
-                if len(tag['match']) < 7  and tag['match'] in COMMON_WORDS_CORPUS["brown_corpus"]:
+                if (len(tag['match']) < 4) or \
+                        (len(tag['match']) < 7  and tag['match'] in COMMON_WORDS_CORPUS["brown_corpus"]):
                     original_case = document[tag['start']:  tag['end']]
                     original_case_no_dash = original_case.replace('-', '')
                     original_case_dash_to_space = original_case.replace('-', ' ')

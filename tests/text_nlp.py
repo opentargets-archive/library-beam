@@ -455,9 +455,9 @@ class SpacyDocumentNLPTestCase(unittest.TestCase):
         concepts = [concept for concept in digested_abstract['concepts'] if 'PPP3CC' in concept['object']]
         self.assertNotEquals(concepts,[])
         for concept in concepts:
-            tags_types = [t['category'] for t in concept['object_tags']]
+            tags_types = concept['object_tags'].keys()
             self.assertIn('GENE',tags_types)
-            for tag in concept['object_tags']:
+            for tag in concept['object_tags']['GENE']:
 
                 matched_text = tag['match'].lower()
                 positions_text = concept['sentence_text'][tag['start']:tag['end']].lower()
