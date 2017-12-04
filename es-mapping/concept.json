@@ -805,48 +805,48 @@
           ]
         }
       }
-    },
-    "mappings": {
-      "_default_": {
-        "_all": {
-          "enabled": true
-        },
-        "dynamic_templates": [
-          {
-            "string_fields": {
-              "mapping": {
-                "type": "keyword",
-                "ignore_above": 256
-              },
-              "match": "*",
-              "match_mapping_type": "string"
-            }
-          }
-        ]
+    }
+  },
+  "mappings": {
+    "_default_": {
+      "_all": {
+        "enabled": true
       },
-      "publication": {
-        "_all": {
-          "enabled": true
-        },
-        "dynamic_templates": [
-          {
-            "string_fields": {
-              "mapping": {
-                "type": "keyword",
-                "ignore_above": 256
-              },
-              "match": "*",
-              "match_mapping_type": "string"
-            }
+      "dynamic_templates": [
+        {
+          "string_fields": {
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "match": "*",
+            "match_mapping_type": "string"
           }
-        ],
-        "properties": {
-          "abstract": {
-            "type": "text",
-            "analyzer": "english",
-            "eager_global_ordinals": true,
-            "fielddata": true
+        }
+      ]
+    },
+    "publication": {
+      "_all": {
+        "enabled": true
+      },
+      "dynamic_templates": [
+        {
+          "string_fields": {
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "match": "*",
+            "match_mapping_type": "string"
           }
+        }
+      ],
+      "properties": {
+        "abstract": {
+          "type": "text",
+          "analyzer": "english",
+          "eager_global_ordinals": true,
+          "fielddata": true
         }
       }
     }

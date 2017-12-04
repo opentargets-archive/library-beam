@@ -568,7 +568,7 @@ class DocumentAnalysisSpacy(object):
             if matched_text in lowered_long_forms:
                 acronyms_to_extend[inverted_abbreviations[matched_text]] = tag
         if acronyms_to_extend:  # extend matches of long form to the short version if needed
-            acronym_tags = self._tagger.extend_tags_to_alternative_forms(document, acronyms_to_extend, self._tagger.tag_labels)
+            acronym_tags = self._tagger.extend_tags_to_alternative_forms(document, acronyms_to_extend)
             acronym_filtered_tags.extend(acronym_tags)
         acronyms_to_extend_lowered = [i.lower() for i in acronyms_to_extend]
         self.filtered_tags = sorted(acronym_filtered_tags, key=lambda x: (x['start'], -x['end']))
@@ -724,7 +724,7 @@ class DocumentAnalysisSpacy(object):
                                     ref=ref.split('/')[-1]
                                 token_refid[s_i][token.i] = ref
                             if token.i  not in token_labels[s_i]:
-                                token_labels[s_i][token.i] = unicode(tag['label'], 'utf-8')
+                                token_labels[s_i][token.i] = MatchedTag.sanitize_string(tag['label'])
                     break
         # for s_i, s in enumerate(self.doc.sents):
         #     analyzed_sentence_doc = self.analysed_sentences[s_i].doc

@@ -615,6 +615,11 @@ class CleanPublication(beam.DoFn):
             del parsed_element['text_mined_entities']['nlp']['concepts']
         except KeyError:
             pass
+        try:
+            del parsed_element['text_mined_entities']['nlp']['embedding_text']
+        except KeyError:
+            pass
+
         yield json.dumps(parsed_element,
                          default=json_serialize,
                          sort_keys=True,

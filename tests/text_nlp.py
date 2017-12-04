@@ -434,7 +434,8 @@ class SpacyDocumentNLPTestCase(unittest.TestCase):
         text = u'This is a test, for a complex entity name: th:is.{e}nt/ity-is,ver-y/co_m[p]lex(to)par;se ' \
                u'this_is-simpler. but this is an other sentence\nand this is after a new line'
 
-        doc_analysis = DocumentAnalysisSpacy(self.nlp, )
+        doc_analysis = DocumentAnalysisSpacy(self.nlp,
+                                             tagger=self.tagger)
         doc, digest = doc_analysis.process(text)
         sentences = list(doc.sents)
         self.assertEqual(len(sentences), 2)
@@ -449,13 +450,13 @@ class SpacyDocumentNLPTestCase(unittest.TestCase):
 
     def test_tags_in_concepts(self):
         abstracts_analyzer = DocumentAnalysisSpacy(nlp=self.nlp,
-                                                   tagger=BioEntityTagger())
+                                                   tagger=self.tagger)
         digested_abstract = abstracts_analyzer.digest(chromosome8p_text)
         concepts = [concept for concept in digested_abstract['concepts'] if 'PPP3CC' in concept['object']]
         self.assertNotEquals(concepts,[])
         for concept in concepts:
             tags_types = [t['category'] for t in concept['object_tags']]
-            self.assertIn('TARGET',tags_types)
+            self.assertIn('GENE',tags_types)
             for tag in concept['object_tags']:
 
                 matched_text = tag['match'].lower()
@@ -474,7 +475,8 @@ class SpacyDocumentNLPTestCase(unittest.TestCase):
                u'nomination. He then defeated Republican nominee John McCain in the general election, ' \
                u'and was inaugurated as president on January 20, 2009. Nine months after his inauguration, ' \
                u'Obama was named the 2009 Nobel Peace Prize laureate.'
-        abstracts_analyzer = DocumentAnalysisSpacy(nlp=self.nlp)
+        abstracts_analyzer = DocumentAnalysisSpacy(nlp=self.nlp,
+                                                   tagger=self.tagger)
         digested_abstract = abstracts_analyzer.digest(text)
         print 'Top Noun Phrases:', len(digested_abstract['top_chunks']), digested_abstract['top_chunks']
         print 'Noun Phrases:', len(digested_abstract['chunks'])
@@ -485,15 +487,15 @@ class SpacyDocumentNLPTestCase(unittest.TestCase):
 
 
         abstracts_analyzer = DocumentAnalysisSpacy(nlp=self.nlp,
-                                                   tagger=BioEntityTagger())
+                                                   tagger=self.tagger)
         digested_abstract = abstracts_analyzer.digest(text)
         clean_abstract = abstracts_analyzer.to_text()
         self.assertNotIn(',', clean_abstract )
-        self.assertIn('Molecular_genetics', clean_abstract)
+        self.assertIn('molecular_genetics', clean_abstract)
         pos_tagged_abstract = abstracts_analyzer.to_pos_tagged_text()
-        self.assertIn('Molecular_genetics|NOUN', pos_tagged_abstract)
+        self.assertIn('molecular_genetics|NOUN', pos_tagged_abstract)
         ent_and_pos_tagged_abstract =  abstracts_analyzer.to_entity_tagged_text()
-        self.assertIn('ADRA1A|PROPN|TARGET', ent_and_pos_tagged_abstract)
+        self.assertIn('ensg00000120907|GENE|ADRA1D', ent_and_pos_tagged_abstract)
 
 
     def testEbmeddingTrainingSave(self):
@@ -503,7 +505,8 @@ class SpacyDocumentNLPTestCase(unittest.TestCase):
         clean_file_lower =codecs. open('embedding_training_lower.txt','w',encoding="utf-8")
         pos_file = codecs.open('embedding_training_pos.txt','w',encoding="utf-8")
         ent_and_pos_file = codecs.open('embedding_training_end_and_pos.txt','w', encoding="utf-8")
-        abstracts_analyzer = DocumentAnalysisSpacy(nlp=self.nlp, tagger=self.tagger)
+        abstracts_analyzer = DocumentAnalysisSpacy(nlp=self.nlp,
+                                                   tagger=self.tagger)
         # for i, doc in enumerate(abstrac  n_threads=8)):
 
         for i,abstract in enumerate(file(os.path.join(filedir, file_path))):
