@@ -10,7 +10,7 @@ from fuzzywuzzy import fuzz
 from rope.base.codeanalyze import ChangeCollector
 
 from BioStopWords import DOMAIN_STOP_WORDS
-from vocabulary import vocabulary_urls
+from modules.vocabulary import vocabulary_urls
 
 unicode_punctation_table = dict.fromkeys(i for i in xrange(sys.maxunicode)
                                          if unicodedata.category(unichr(i)).startswith('P'))

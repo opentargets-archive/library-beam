@@ -1,6 +1,6 @@
 {
   "settings": {
-    "number_of_shards": 10,
+    "number_of_shards": 6,
     "number_of_replicas": 0,
     "analysis": {
       "filter": {
@@ -825,9 +825,9 @@
         }
       ]
     },
-    "publication": {
+    "concept": {
       "_all": {
-        "enabled": true
+        "enabled": false
       },
       "dynamic_templates": [
         {
@@ -842,11 +842,39 @@
         }
       ],
       "properties": {
-        "abstract": {
-          "type": "text",
-          "analyzer": "english",
-          "eager_global_ordinals": true,
-          "fielddata": true
+        "concept": {
+          "type": "object",
+          "properties": {
+            "sentence_text": {
+              "type": "text",
+              "analyzer": "english",
+              "eager_global_ordinals": true,
+              "fielddata": true
+            },
+            "verb_subtree": {
+              "type": "text",
+              "analyzer": "english",
+              "eager_global_ordinals": true,
+              "fielddata": true
+            },
+            "relations": {
+              "type": "object",
+              "properties": {
+                "directed": {
+                  "type": "text",
+                  "analyzer": "whitespace",
+                  "eager_global_ordinals": true,
+                  "fielddata": true
+                },
+                "undirected": {
+                  "type": "text",
+                  "analyzer": "whitespace",
+                  "eager_global_ordinals": true,
+                  "fielddata": true
+                }
+              }
+            }
+          }
         }
       }
     }

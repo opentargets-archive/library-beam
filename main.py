@@ -11,9 +11,6 @@ import en_depent_web_md
 # import en_core_web_md
 import nltk
 import spacy
-import textblob
-
-from modules.BioentityTagger import BioEntityTagger
 from apache_beam.coders import coders
 # from apache_beam.examples.complete.game.user_score import WriteToBigQuery
 from apache_beam.io import Read, iobase, WriteToText, ReadFromText
@@ -29,16 +26,47 @@ from lxml import etree, objectify
 from spacy.language_data import TOKENIZER_INFIXES
 from spacy.tokenizer import Tokenizer
 
+from modules.BioentityTagger import BioEntityTagger
 from modules.NLP import NounChuncker, DocumentAnalysisSpacy
 
 MEDLINE_BASE_PATH = 'pubmed/baseline'
 MEDLINE_UPDATE_PATH = 'pubmed/updatefiles'
 EXPECTED_ENTRIES_IN_MEDLINE_BASELINE_FILE = 30000
 
-BQ_SCHEMA = '''{"fields":[{"mode":"NULLABLE","name":"_text_analyzers","type":"STRING"},{"fields":[{"mode":"NULLABLE","name":"label","type":"STRING"},{"mode":"NULLABLE","name":"id","type":"STRING"}],"mode":"REPEATED","name":"mesh_headings","type":"RECORD"},{"fields":[{"fields":[{"mode":"REPEATED","name":"chunks","type":"STRING"},{"fields":[{"mode":"NULLABLE","name":"term","type":"STRING"},{"mode":"NULLABLE","name":"score","type":"FLOAT"}],"mode":"REPEATED","name":"key_chunks","type":"RECORD"},{"fields":[{"mode":"NULLABLE","name":"short","type":"STRING"},{"mode":"NULLABLE","name":"long","type":"STRING"}],"mode":"REPEATED","name":"abbreviations","type":"RECORD"},{"mode":"REPEATED","name":"named_entities","type":"STRING"},{"fields":[{"mode":"NULLABLE","name":"short","type":"STRING"},{"mode":"NULLABLE","name":"long","type":"STRING"}],"mode":"REPEATED","name":"acronyms","type":"RECORD"},{"mode":"REPEATED","name":"recurring_chunks","type":"STRING"},{"mode":"REPEATED","name":"top_chunks","type":"STRING"}],"mode":"NULLABLE","name":"nlp","type":"RECORD"},{"fields":[{"mode":"REPEATED","name":"chunks","type":"STRING"},{"mode":"REPEATED","name":"recurring_chunks","type":"STRING"},{"mode":"REPEATED","name":"top_chunks","type":"STRING"},{"fields":[{"mode":"NULLABLE","name":"short","type":"STRING"},{"mode":"NULLABLE","name":"long","type":"STRING"}],"mode":"REPEATED","name":"abbreviations","type":"RECORD"}],"mode":"NULLABLE","name":"noun_phrases","type":"RECORD"}],"mode":"NULLABLE","name":"text_mined_entities","type":"RECORD"},{"fields":[{"mode":"NULLABLE","name":"registryNumber","type":"STRING"},{"mode":"NULLABLE","name":"name_id","type":"STRING"},{"mode":"NULLABLE","name":"name","type":"STRING"}],"mode":"REPEATED","name":"chemicals","type":"RECORD"},{"mode":"NULLABLE","name":"filename","type":"STRING"},{"mode":"REPEATED","name":"full_text_url","type":"STRING"},{"mode":"NULLABLE","name":"full_text","type":"STRING"},{"mode":"NULLABLE","name":"is_open_access","type":"STRING"},{"mode":"REPEATED","name":"references","type":"STRING"},{"fields":[{"mode":"NULLABLE","name":"issue","type":"STRING"},{"mode":"NULLABLE","name":"pgn","type":"STRING"},{"mode":"NULLABLE","name":"volume","type":"STRING"}],"mode":"NULLABLE","name":"journal_reference","type":"RECORD"},{"fields":[{"mode":"NULLABLE","name":"medlineAbbreviation","type":"STRING"},{"mode":"NULLABLE","name":"title","type":"STRING"}],"mode":"NULLABLE","name":"journal","type":"RECORD"},{"mode":"NULLABLE","name":"date_of_revision","type":"STRING"},{"mode":"REPEATED","name":"keywords","type":"STRING"},{"mode":"NULLABLE","name":"doi","type":"STRING"},{"mode":"NULLABLE","name":"id","type":"INTEGER"},{"mode":"REPEATED","name":"pub_type","type":"STRING"},{"mode":"NULLABLE","name":"title","type":"STRING"},{"mode":"NULLABLE","name":"cited_by","type":"STRING"},{"mode":"NULLABLE","name":"has_references","type":"STRING"},{"mode":"NULLABLE","name":"_delete_pmids","type":"STRING"},{"fields":[{"mode":"NULLABLE","name":"Identifier","type":"STRING"},{"mode":"NULLABLE","name":"CollectiveName","type":"STRING"},{"mode":"NULLABLE","name":"Suffix","type":"STRING"},{"mode":"NULLABLE","name":"affiliation","type":"STRING"},{"mode":"NULLABLE","name":"full_name","type":"STRING"},{"mode":"NULLABLE","name":"last_name","type":"STRING"},{"mode":"NULLABLE","name":"short_name","type":"STRING"}],"mode":"REPEATED","name":"authors","type":"RECORD"},{"mode":"NULLABLE","name":"pub_date","type":"DATE"},{"mode":"NULLABLE","name":"has_text_mined_entities","type":"STRING"},{"mode":"NULLABLE","name":"date","type":"DATE"},{"mode":"NULLABLE","name":"abstract","type":"STRING"},{"mode":"NULLABLE","name":"data_release","type":"FLOAT"}]}'''
-
-
-
+BQ_SCHEMA = '''{"fields":[{"mode":"NULLABLE","name":"_text_analyzers","type":"STRING"},{"fields":[{"mode":"NULLABLE",
+"name":"label","type":"STRING"},{"mode":"NULLABLE","name":"id","type":"STRING"}],"mode":"REPEATED",
+"name":"mesh_headings","type":"RECORD"},{"fields":[{"fields":[{"mode":"REPEATED","name":"chunks","type":"STRING"},
+{"fields":[{"mode":"NULLABLE","name":"term","type":"STRING"},{"mode":"NULLABLE","name":"score","type":"FLOAT"}],
+"mode":"REPEATED","name":"key_chunks","type":"RECORD"},{"fields":[{"mode":"NULLABLE","name":"short","type":"STRING"},
+{"mode":"NULLABLE","name":"long","type":"STRING"}],"mode":"REPEATED","name":"abbreviations","type":"RECORD"},
+{"mode":"REPEATED","name":"named_entities","type":"STRING"},{"fields":[{"mode":"NULLABLE","name":"short",
+"type":"STRING"},{"mode":"NULLABLE","name":"long","type":"STRING"}],"mode":"REPEATED","name":"acronyms",
+"type":"RECORD"},{"mode":"REPEATED","name":"recurring_chunks","type":"STRING"},{"mode":"REPEATED",
+"name":"top_chunks","type":"STRING"}],"mode":"NULLABLE","name":"nlp","type":"RECORD"},{"fields":[{"mode":"REPEATED",
+"name":"chunks","type":"STRING"},{"mode":"REPEATED","name":"recurring_chunks","type":"STRING"},{"mode":"REPEATED",
+"name":"top_chunks","type":"STRING"},{"fields":[{"mode":"NULLABLE","name":"short","type":"STRING"},
+{"mode":"NULLABLE","name":"long","type":"STRING"}],"mode":"REPEATED","name":"abbreviations","type":"RECORD"}],
+"mode":"NULLABLE","name":"noun_phrases","type":"RECORD"}],"mode":"NULLABLE","name":"text_mined_entities",
+"type":"RECORD"},{"fields":[{"mode":"NULLABLE","name":"registryNumber","type":"STRING"},{"mode":"NULLABLE",
+"name":"name_id","type":"STRING"},{"mode":"NULLABLE","name":"name","type":"STRING"}],"mode":"REPEATED",
+"name":"chemicals","type":"RECORD"},{"mode":"NULLABLE","name":"filename","type":"STRING"},{"mode":"REPEATED",
+"name":"full_text_url","type":"STRING"},{"mode":"NULLABLE","name":"full_text","type":"STRING"},{"mode":"NULLABLE",
+"name":"is_open_access","type":"STRING"},{"mode":"REPEATED","name":"references","type":"STRING"},{"fields":[{
+"mode":"NULLABLE","name":"issue","type":"STRING"},{"mode":"NULLABLE","name":"pgn","type":"STRING"},
+{"mode":"NULLABLE","name":"volume","type":"STRING"}],"mode":"NULLABLE","name":"journal_reference","type":"RECORD"},
+{"fields":[{"mode":"NULLABLE","name":"medlineAbbreviation","type":"STRING"},{"mode":"NULLABLE","name":"title",
+"type":"STRING"}],"mode":"NULLABLE","name":"journal","type":"RECORD"},{"mode":"NULLABLE","name":"date_of_revision",
+"type":"STRING"},{"mode":"REPEATED","name":"keywords","type":"STRING"},{"mode":"NULLABLE","name":"doi",
+"type":"STRING"},{"mode":"NULLABLE","name":"id","type":"INTEGER"},{"mode":"REPEATED","name":"pub_type",
+"type":"STRING"},{"mode":"NULLABLE","name":"title","type":"STRING"},{"mode":"NULLABLE","name":"cited_by",
+"type":"STRING"},{"mode":"NULLABLE","name":"has_references","type":"STRING"},{"mode":"NULLABLE",
+"name":"_delete_pmids","type":"STRING"},{"fields":[{"mode":"NULLABLE","name":"Identifier","type":"STRING"},
+{"mode":"NULLABLE","name":"CollectiveName","type":"STRING"},{"mode":"NULLABLE","name":"Suffix","type":"STRING"},
+{"mode":"NULLABLE","name":"affiliation","type":"STRING"},{"mode":"NULLABLE","name":"full_name","type":"STRING"},
+{"mode":"NULLABLE","name":"last_name","type":"STRING"},{"mode":"NULLABLE","name":"short_name","type":"STRING"}],
+"mode":"REPEATED","name":"authors","type":"RECORD"},{"mode":"NULLABLE","name":"pub_date","type":"DATE"},
+{"mode":"NULLABLE","name":"has_text_mined_entities","type":"STRING"},{"mode":"NULLABLE","name":"date","type":"DATE"},
+{"mode":"NULLABLE","name":"abstract","type":"STRING"},{"mode":"NULLABLE","name":"data_release","type":"FLOAT"}]}'''
 
 
 def _get_field_schema(**kwargs):
@@ -57,11 +85,13 @@ def _inject_fields(fields, table_schema):
     for field in fields:
         table_schema.fields.append(_get_field_schema(**field))
 
+
 def parse_bq_json_schema(schema):
     table_schema = bigquery.TableSchema()
     _inject_fields(schema['fields'], table_schema)
     # table_schema = pickler.loads(pickler.dumps(table_schema))
     return table_schema
+
 
 def json_serialize(obj):
     if isinstance(obj, datetime):
@@ -73,6 +103,7 @@ def json_serialize(obj):
             return obj.__dict__
         except AttributeError:
             raise TypeError('Type not serializable')
+
 
 class _MedlineTextSource(_TextSource):
     def read_records(self, file_path, range_tracker):
@@ -257,52 +288,52 @@ def parse_medline_xml(record, filename):
 
                         publication['mesh_terms'].append(mesh_heading)
 
-        elif medline.tag == 'DeleteCitation':#collect deleted citations
+        elif medline.tag == 'DeleteCitation':  # collect deleted citations
             publication['delete_pmids'] = list()
             for deleted_pmid in medline.getchildren():
                 publication['delete_pmids'].append(deleted_pmid.text)
 
         publication['filename'] = filename
 
-
         # publication['text_analyzers'] = self.analyzers
-        if 'delete_pmids' in publication and publication['delete_pmids']:#yield empty objects for each deleted citations
+        if 'delete_pmids' in publication and publication[
+            'delete_pmids']:  # yield empty objects for each deleted citations
             for pmid in publication['delete_pmids']:
                 '''update parent and analyzed child publication with empty values'''
                 yield dict(pub_id=pmid,
                            filename=publication.get('filename'),
-                           is_deleted = True
+                           is_deleted=True
                            )
         else:
             yield dict(pub_id=publication['pmid'],
-                        title=publication.get('title'),
-                        abstract=publication.get('abstract'),
-                        authors=publication.get('authors'),
-                        pub_date=publication.get('pub_date'),
-                        date=publication.get("first_publication_date"),
-                        journal=publication.get('journal'),
-                        journal_reference=publication.get("journal_reference"),
-                        full_text=u"",
-                        # full_text_url=publication['fullTextUrlList']['fullTextUrl'],
-                        keywords=publication.get('keywords'),
-                        doi=publication.get('doi'),
-                        # cited_by=publication['citedByCount'],
-                        # has_text_mined_terms=publication['hasTextMinedTerms'] == u'Y',
-                        # has_references=publication['hasReferences'] == u'Y',
-                        # is_open_access=publication['isOpenAccess'] == u'Y',
-                        pub_type=publication.get('pub_types'),
-                        filename=publication.get('filename'),
-                        mesh_headings=publication.get('mesh_terms'),
-                        chemicals=publication.get('chemicals'),
-                        # text_analyzers=self.analyzers,
-                        )
+                       title=publication.get('title'),
+                       abstract=publication.get('abstract'),
+                       authors=publication.get('authors'),
+                       pub_date=publication.get('pub_date'),
+                       date=publication.get("first_publication_date"),
+                       journal=publication.get('journal'),
+                       journal_reference=publication.get("journal_reference"),
+                       full_text=u"",
+                       # full_text_url=publication['fullTextUrlList']['fullTextUrl'],
+                       keywords=publication.get('keywords'),
+                       doi=publication.get('doi'),
+                       # cited_by=publication['citedByCount'],
+                       # has_text_mined_terms=publication['hasTextMinedTerms'] == u'Y',
+                       # has_references=publication['hasReferences'] == u'Y',
+                       # is_open_access=publication['isOpenAccess'] == u'Y',
+                       pub_type=publication.get('pub_types'),
+                       filename=publication.get('filename'),
+                       mesh_headings=publication.get('mesh_terms'),
+                       chemicals=publication.get('chemicals'),
+                       # text_analyzers=self.analyzers,
+                       )
 
     except etree.XMLSyntaxError as e:
         pmid = 'n/a'
         try:
             pmid_end = record.index('</PMID>')
             if pmid_end:
-                pmid = record[pmid_end-8:pmid_end]
+                pmid = record[pmid_end - 8:pmid_end]
         except:
             print e
         logging.error("Error parsing XML file {} - medline record {}".format(filename, pmid), e.message)
@@ -319,7 +350,6 @@ def parse_article_info(article, publication):
                 if abstractText.text:
                     abstracts.append(abstractText.text)
             publication['abstract'] = ' '.join(abstracts)
-
 
         if e.tag == 'Journal':
             publication['journal'] = {}
@@ -366,19 +396,25 @@ def parse_article_info(article, publication):
                 author_dict = dict()
                 for e in author.getchildren():
                     if e.tag == 'AffiliationInfo':
-                        aff = list(e.getiterator('Affiliation'))
-                        if aff:
-                            author_dict['Affiliation'] = aff[0].text
+                        try:
+                            aff = list(e.getiterator('Affiliation'))
+                            if aff:
+                                author_dict['Affiliation'] = aff[0].text
+                        except:
+                            logging.error('cannot parse author affiliation ')
                     else:
                         author_dict[e.tag] = e.text
 
                 if 'LastName' in author_dict:
-                    author_dict['short_name'] = author_dict['LastName']
-                    author_dict['full_name'] = author_dict['LastName']
-                    if 'Initials' in author_dict:
-                        author_dict['short_name'] += ' '+author_dict['Initials']
-                    if 'ForeName' in author_dict:
-                        author_dict['full_name'] += ' '+author_dict['ForeName']
+                    try:
+                        author_dict['short_name'] = author_dict['LastName']
+                        author_dict['full_name'] = author_dict['LastName']
+                        if 'Initials' in author_dict:
+                            author_dict['short_name'] += ' ' + author_dict['Initials']
+                        if 'ForeName' in author_dict:
+                            author_dict['full_name'] += ' ' + author_dict['ForeName']
+                    except:
+                        logging.error('cannot store full author name for %s' % (str(author_dict)))
                 publication['authors'].append(author_dict)
 
         if e.tag == 'Pagination':
@@ -402,11 +438,10 @@ class MedlineXMLParser(beam.DoFn):
     def process(self, element, *args, **kwargs):
         rec, file_name = element
         for parsed_record in parse_medline_xml(rec, file_name):
-            yield parsed_record['pub_id'],parsed_record
+            yield parsed_record['pub_id'], parsed_record
 
 
 class TagBioEntity(beam.DoFn):
-
     def process(self, element, *args, **kwargs):
         if element:
             text_to_match = get_text_to_analyze(element)
@@ -417,7 +452,6 @@ class TagBioEntity(beam.DoFn):
                 element['bioentity'] = matches
 
             yield element
-
 
     def start_bundle(self):
         """Called before a bundle of elements is processed on a worker.
@@ -433,17 +467,16 @@ class TagBioEntity(beam.DoFn):
         self.tagger = BioEntityTagger()
 
 
-
 class NLPAnalysis(beam.DoFn):
-
     def process(self, element, *args, **kwargs):
         element['text_mined_entities'] = {}
 
         for analyzer in self.analyzers:
             try:
-                element['text_mined_entities'][str(analyzer)]=analyzer.digest(get_text_to_analyze(element))
+                element['text_mined_entities'][str(analyzer)] = analyzer.digest(get_text_to_analyze(element))
             except:
-                logging.exception("error in nlp analysis with %s analyser for text: %s"%(str(analyzer), get_text_to_analyze(element)))
+                logging.exception("error in nlp analysis with %s analyser for text: %s" % (
+                str(analyzer), get_text_to_analyze(element)))
                 element['text_mined_entities'][str(analyzer)] = {}
         yield element
 
@@ -477,13 +510,12 @@ class NLPAnalysis(beam.DoFn):
             self.nlp = NLPAnalysis._init_spacy_english_language()
             steps_done.append('STARTING TAGGER')
             self._tagger = BioEntityTagger(partial_match=False)
-            self.analyzers = [DocumentAnalysisSpacy(self.nlp, tagger=self._tagger),NounChuncker()]
+            self.analyzers = [DocumentAnalysisSpacy(self.nlp, tagger=self._tagger), NounChuncker()]
             steps_done.append('NLP MODEL INITIALIZED')
         except:
             logging.exception('NLP MODEL INIT FAILED MISERABLY')
             steps_done.append('NLP MODEL INIT FAILED MISERABLY')
             self.analyzers = []
-
 
         logging.info(steps_done)
 
@@ -491,12 +523,18 @@ class NLPAnalysis(beam.DoFn):
     def _create_tokenizer(nlp):
         infix_re = spacy.util.compile_infix_regex(TOKENIZER_INFIXES + [  # u'\w*[,-.–_—:;\(\)\[\]\{\}/]{1,3}\S\w*',
             # r'\w*[,\-.\-_:;\(\)\[\]\{\}\/]{1,3}\S\w*',
-            # r'((?P<start_with_non_whitespace_and_one_or_more_punctation>\b\S+|[,.-_:;\(\)\[\]\{\}/\+])(?P<has_1_or_more_punctation>[,.-_:;\(\)\[\]\{\}/\+])+(?P<ends_with_non_whitespace_or_non_terminating_punctation>\S+\b[,.-_:;\(\)\[\]\{\}/\+]|[,.-_:;\(\)\[\]\{\}/\+|\-]|\S+\b))',
+            # r'((?P<start_with_non_whitespace_and_one_or_more_punctation>\b\S+|[,.-_:;\(\)\[\]\{\}/\+])(
+            # ?P<has_1_or_more_punctation>[,.-_:;\(\)\[\]\{\}/\+])+(
+            # ?P<ends_with_non_whitespace_or_non_terminating_punctation>\S+\b[,.-_:;\(\)\[\]\{\}/\+]|[,.-_:;\(\)\[
+            # \]\{\}/\+|\-]|\S+\b))',
             # r'\w*\S-\S*\w',
             # u'\w*\S–\S*\w',
             # u'\w*\S—\S*\w',
             # u'\w*[,-.–_—:;\(\)\[\]\{\}/]{1,3}\S\w*'
-            ur'(?P<start_with_non_whitespace_and_one_or_more_punctation>\b\S*|[,.-_-:–;—\(\[\{/\+]?)(?P<has_1_or_more_punctation>[,.-_-:–;—\(\)\[\]\{\}/\+])+(?P<ends_with_non_whitespace_or_non_terminating_punctation>\S+\b[,.-_-:–;—\)\]\}/\+]|[,.-_-:–;—\)\]\}/\+}]|\S+\b)'
+            ur'(?P<start_with_non_whitespace_and_one_or_more_punctation>\b\S*|[,.-_-:–;—\(\[\{/\+]?)('
+            ur'?P<has_1_or_more_punctation>[,.-_-:–;—\(\)\[\]\{\}/\+])+('
+            ur'?P<ends_with_non_whitespace_or_non_terminating_punctation>\S+\b[,.-_-:–;—\)\]\}/\+]|[,'
+            ur'.-_-:–;—\)\]\}/\+}]|\S+\b)'
         ])
         # TODO: prefix and suffix raise TypeError: '_regex.Pattern' object is not callable
         # prefix_boundaries_to_keep =  ur'\) \] \} \> , . - _ - : – ; — \+ -'.split()
@@ -510,6 +548,7 @@ class NLPAnalysis(beam.DoFn):
         #                  infix_re.finditer)
         return Tokenizer(nlp.vocab, {}, nlp.tokenizer.prefix_search, nlp.tokenizer.suffix_search,
                          infix_re.finditer)
+
     @staticmethod
     def _init_spacy_english_language():
         # nlp = en_core_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
@@ -531,17 +570,20 @@ class ToJSON(beam.DoFn):
             logging.error('cannot serialize object to json because of non ascii chars')
             nltk.pprint(element)
 
+
 class GetLatestVersion(beam.DoFn):
     ''' gets a lsit of records grouped by PubmedID and yield its latest version
     according to the file name it was read from'''
+
     def process(self, element, *args, **kwargs):
         pmid, versions = element
-        versions = list(versions)#workaround for dataflow runner
+        versions = list(versions)  # workaround for dataflow runner
         if versions:
-            if len(versions)>1:
+            if len(versions) > 1:
                 yield sorted(versions, key=lambda x: x['filename'])[-1]
             else:
                 yield versions[0]
+
 
 class ExtractConcepts(beam.DoFn):
     def process(self, element, *args, **kwargs):
@@ -549,8 +591,49 @@ class ExtractConcepts(beam.DoFn):
         try:
             if 'concepts' in parsed_element['text_mined_entities']['nlp']:
                 for concept in parsed_element['text_mined_entities']['nlp']['concepts']:
-                    yield json.dumps(dict(concept = concept,
-                                          pub_id = parsed_element['pub_id']),
+                    if 'object_tags' not in concept:
+                        concept['object_tags'] = {}
+                    concept['object_tags']['CONCEPT']=[
+                        dict(
+                            category="CONCEPT",
+                            end=concept['object_range']['end'],
+                            label=concept['object'],
+                            match=concept['object'],
+                            original_value=concept['object'],
+                            reference=concept['object'].replace(' ', '_'),
+                            reference_db="",
+                            sentence=None,
+                            start=concept['object_range']['start']
+                        )]
+                    if 'subject_tags' not in concept:
+                        concept['subject_tags'] = {}
+                    concept['subject_tags']['CONCEPT']=[
+                        dict(
+                            category="CONCEPT",
+                            end=concept['subject_range']['end'],
+                            label=concept['subject'],
+                            match=concept['subject'],
+                            original_value=concept['subject'],
+                            reference=concept['subject'].replace(' ', '_'),
+                            reference_db="",
+                            sentence=None,
+                            start=concept['subject_range']['start']
+                        )]
+                    concept['relations']=dict(directed=[],
+                                              undirected=[])
+                    for stags in concept['subject_tags'].values():
+                        for s in stags:
+                            for otags in concept['object_tags'].values():
+                                for o in otags:
+                                    relation = s['reference']+'|'+o['reference']
+                                    concept['relations']['directed'].append(relation)
+                                    concept['relations']['undirected'].append(relation)
+                                    concept['relations']['undirected'].append(o['reference']+'|'+s['reference'])
+
+                    yield json.dumps(dict(concept=concept,
+                                          pub_id=parsed_element['pub_id'],
+                                          date=parsed_element['pub_date'],
+                                          abbreviations= parsed_element['text_mined_entities']['nlp']['abbreviations']),
                                      default=json_serialize,
                                      sort_keys=True,
                                      ensure_ascii=False,
@@ -559,13 +642,14 @@ class ExtractConcepts(beam.DoFn):
         except KeyError:
             logging.exception('cannot extract concepts form article')
 
+
 class ExtractBioentities(beam.DoFn):
     def process(self, element, *args, **kwargs):
         parsed_element = json.loads(element)
         try:
             if 'tagged_entities' in parsed_element['text_mined_entities']['nlp']:
-                yield json.dumps(dict(entities = parsed_element['text_mined_entities']['nlp']['tagged_entities'],
-                                          pub_id = parsed_element['pub_id']),
+                yield json.dumps(dict(entities=parsed_element['text_mined_entities']['nlp']['tagged_entities'],
+                                      pub_id=parsed_element['pub_id']),
                                  default=json_serialize,
                                  sort_keys=True,
                                  ensure_ascii=False,
@@ -573,6 +657,7 @@ class ExtractBioentities(beam.DoFn):
                                  )
         except KeyError:
             logging.exception('cannot extract bioentities form article')
+
 
 class ExtractTaggedText(beam.DoFn):
     def process(self, element, *args, **kwargs):
@@ -582,9 +667,9 @@ class ExtractTaggedText(beam.DoFn):
             if 'tagged_text' in parsed_element['text_mined_entities']['nlp']:
                 tagged_text = parsed_element['text_mined_entities']['nlp']['tagged_text']
                 try:
-                    partitioned_text = title= tagged_text.partition('. ')
-                    tagged_text_obj = dict(title= partitioned_text[0],
-                                           abstract = partitioned_text[2],
+                    partitioned_text  = tagged_text.partition('. ')
+                    tagged_text_obj = dict(title=partitioned_text[0],
+                                           abstract=partitioned_text[2],
                                            pub_id=parsed_element['pub_id'])
                 except:
                     tagged_text_obj = dict(title='',
@@ -599,6 +684,7 @@ class ExtractTaggedText(beam.DoFn):
                                  )
         except KeyError:
             logging.exception('cannot extract tagged text form article')
+
 
 class CleanPublication(beam.DoFn):
     def process(self, element, *args, **kwargs):
@@ -636,9 +722,6 @@ class Print(beam.DoFn):
 class Consume(beam.DoFn):
     def process(self, element, *args, **kwargs):
         pass
-
-
-
 
 
 def run(argv=None):
@@ -687,20 +770,19 @@ def run(argv=None):
             else:
                 raise AttributeError('at least an XML input is required')
 
-
-
-
             parsed_medline_articles = medline_articles | 'ParseXMLtoDict' >> beam.ParDo(MedlineXMLParser())
 
             medline_articles_grouped_by_id = parsed_medline_articles | 'GroupByPMID' >> beam.GroupByKey()
 
-            unique_medline_articles = medline_articles_grouped_by_id | 'SortByFilename' >> beam.ParDo(GetLatestVersion())
+            unique_medline_articles = medline_articles_grouped_by_id | 'SortByFilename' >> beam.ParDo(
+                GetLatestVersion())
 
             enriched_articles = unique_medline_articles | 'NLPAnalysis' >> beam.ParDo(NLPAnalysis())
 
             json_enriched_medline_articles = enriched_articles | 'EnrichedMedlineToJSON' >> beam.ParDo(ToJSON())
 
-            json_enriched_medline_articles | 'WriteEnrichedJSONToGS' >> WriteToText(known_args.output_enriched, file_name_suffix='_enriched.json.gz')
+            json_enriched_medline_articles | 'WriteEnrichedJSONToGS' >> WriteToText(known_args.output_enriched,
+                                                                                    file_name_suffix='_enriched.json.gz')
 
         elif known_args.input_enriched:
 
@@ -713,20 +795,19 @@ def run(argv=None):
 
             concepts = json_enriched_medline_articles | 'ArticleToConcepts' >> beam.ParDo(ExtractConcepts())
             concepts | 'WriteConceptJSONToGS' >> WriteToText(known_args.output_splitted,
-                                                              file_name_suffix='_concepts.json.gz')
+                                                             file_name_suffix='_concepts.json.gz')
 
             bioentities = json_enriched_medline_articles | 'ArticleToBioentities' >> beam.ParDo(ExtractBioentities())
             bioentities | 'WriteBioentityJSONToGS' >> WriteToText(known_args.output_splitted,
-                                                              file_name_suffix='_bioentities.json.gz')
+                                                                  file_name_suffix='_bioentities.json.gz')
 
             taggedtext = json_enriched_medline_articles | 'ArticleToTaggedText' >> beam.ParDo(ExtractTaggedText())
             taggedtext | 'WriteTaggedTextJSONToGS' >> WriteToText(known_args.output_splitted,
-                                                                 file_name_suffix='_taggedtext.json.gz')
+                                                                  file_name_suffix='_taggedtext.json.gz')
 
             smallarticles = json_enriched_medline_articles | 'ArticleToSmallArticles' >> beam.ParDo(CleanPublication())
             smallarticles | 'WriteSmallArticleJSONToGS' >> WriteToText(known_args.output_splitted,
-                                                                     file_name_suffix='_small.json.gz')
-
+                                                                       file_name_suffix='_small.json.gz')
 
 
 if __name__ == '__main__':

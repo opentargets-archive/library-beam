@@ -6,14 +6,13 @@ python -m main \
   --temp_location gs://opentargets-library-tmp/temp \
   --setup_file ./setup.py \
   --worker_machine_type n1-highmem-16 \
-  --input_baseline gs://pubmed-medline/baseline/medline17n*.xml.gz \
-  --input_updates gs://pubmed-medline/updatefiles/medline17n*.xml.gz \
-  --output gs://medline-json/parsed/medline-base17 \
-  --output_enriched gs://medline-json/analyzed/medline-base17 \
+  --input_baseline gs://pubmed-medline/baseline/pubmed18n*.xml.gz \
+  --input_updates gs://pubmed-medline/updatefiles/pubmed18n*.xml.gz \
+  --output_enriched gs://medline-json/analyzed/pubmed18 \
   --max_num_workers 32 \
   --zone europe-west1-d
 
 #  --requirements_file requirements.txt \
-#  --output_splitted gs://medline-json/splitted/medline-base17 \
+#  --output_splitted gs://medline-json/splitted/pubmed18 \
 
 

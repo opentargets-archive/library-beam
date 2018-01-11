@@ -29,5 +29,5 @@ vocabulary_urls= [
   # "https://storage.googleapis.com/opentargets-vocabularies/DISEASE-LEXEBI.json",
   "https://storage.googleapis.com/opentargets-vocabularies/PHENOTYPE-HPO.json",
   "https://storage.googleapis.com/opentargets-vocabularies/DRUG-CHEMBL.json",
-
+  "https://storage.googleapis.com/opentargets-vocabularies/DISEASEALT-MONDO.json"
 ]
