@@ -21,7 +21,6 @@ should work). E.g. using [rclone](https://rclone.org/)
   --worker_machine_type n1-highmem-32 \
   --input_baseline gs://my-medline-bucket/baseline/medline17n*.xml.gz \
   --input_updates gs://my-medline-bucket/updatefiles/medline17n*.xml.gz \
-  --output gs://my-medline-bucket-output/parsed/medline-base17 \
   --output_enriched gs://my-medline-bucket-output/analyzed/medline-base17 \
   --max_num_workers 32 \
   --zone europe-west1-d
