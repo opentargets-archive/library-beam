@@ -34,7 +34,7 @@ import setuptools
 # This class handles the pip install mechanism.
 class build(_build):  # pylint: disable=invalid-name
     """A build command class that will be invoked during package install.
-  
+
     The package built using the current setup.py will be staged and later
     installed in the worker using `pip install package'. This class will be
     instantiated during install for this specific scenario and will trigger
@@ -112,28 +112,28 @@ class CustomCommands(setuptools.Command):
 # so this dependency will not trigger anything to be installed unless a version
 # restriction is specified.
 REQUIRED_PACKAGES = [
-    'apache-beam',
+    'apache-beam==2.0.0',
     # 'google-cloud-dataflow',
-    'ftputil',
-    'python-dateutil',
-    'lxml',
-    'spacy',
-    'pyahocorasick',
-    'python-Levenshtein',
-    'fuzzywuzzy',
-    'requests',
+    'ftputil==3.3.1',
+    'python-dateutil==2.6.0',
+    'lxml==3.8.0',
+    'spacy==1.8.2',
+    'pyahocorasick==1.1.4',
+    'python-Levenshtein==0.12.0',
+    'fuzzywuzzy==0.15.0',
+    'requests==2.18.1',
     'textacy',
-    'unidecode',
-    'sklearn',
+    'unidecode==0.4.21',
+    'sklearn==0.0',
     'google-cloud',
-    'google-cloud-storage',
-    'google-cloud-core',
-    'google-cloud-bigquery',
-    'rope',
-    'elasticsearch',
-    'tqdm',
-    'nltk',
-    'textblob'
+    'google-cloud-storage==1.2.0',
+    'google-cloud-core==0.25.0',
+    'google-cloud-bigquery==0.25.0',
+    'rope==0.10.5',
+    'elasticsearch==5.4.0',
+    'tqdm==4.14.0',
+    'nltk==3.2.4',
+    'textblob==0.12.0'
 
     # 'en_core_web_md-1.2.1',
 ]
