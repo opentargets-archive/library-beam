@@ -125,7 +125,7 @@ REQUIRED_PACKAGES = [
     'textacy',
     'unidecode==0.4.21',
     'sklearn==0.0',
-    'google-cloud',
+    'google-cloud==0.25.0'
     'google-cloud-storage==1.2.0',
     'google-cloud-core==0.25.0',
     'google-cloud-bigquery==0.25.0',

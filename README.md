@@ -22,7 +22,6 @@ Starting from scratch:
     (sudo) pip install virtualenv
     virtualenv venv
     source venv/bin/activate
-    pip install google-cloud (if fails less easily if installed this way)
     pip install https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz
     python setup.py install
     ```
