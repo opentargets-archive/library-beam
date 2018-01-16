@@ -10,6 +10,19 @@ should work). E.g. using [rclone](https://rclone.org/)
     `rclone sync medline-ftp:pubmed my-gcp-project-buckets:my-medline-bucket`
   - Update new files:
     `rclone sync medline-ftp:pubmed/updatefiles my-gcp-project-buckets:my-medline-bucket/updatefiles`
+
+
+Starting from scratch:
+- git clone https://github.com/opentargets/library-beam
+- cd library-beam
+- (sudo) pip install virtualenv
+- virtualenv venv
+- source venv/bin/activate
+- pip install google-cloud (possibly)
+- pip install https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz
+- python setup.py install
+
+
 * run NLP analytical pipeline
   ```
   python -m main \
