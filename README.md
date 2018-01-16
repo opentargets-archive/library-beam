@@ -42,6 +42,7 @@ Starting from scratch:
   --max_num_workers 32 \
   --zone europe-west1-d
   ```
+  ![image](https://user-images.githubusercontent.com/148221/35000427-4e11b818-fadc-11e7-9c2f-08a68eaed37e.png)
 * OPTIONAL run job to split Enriched JSONs in smaller pieces
   ```
   python -m main \
@@ -56,5 +57,5 @@ Starting from scratch:
   --max_num_workers 16 \
   --zone europe-west1-d
   ```
-
+  ![image](https://user-images.githubusercontent.com/148221/35000458-6108bb24-fadc-11e7-8a84-452f7b3816f6.png)
 * run job load JSONs in Elasticsearch (TODO)
