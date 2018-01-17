@@ -1,12 +1,12 @@
-## Open Targets Library - Analytical Pipeline
+# Open Targets Library - Analytical Pipeline
 
-# MedLine NLP Analysis Running in Apache Beam
+## MedLine NLP Analysis Running in Apache Beam
 
 This Pipeline is designed to run with Apache Beam using the dataflow runner.
 It has not been tested with other Beam backends, but it should work there as well pending minimal modifications.
 please see the Apache Beam SDK for more info.
 
-# Steps to reproduce a full run
+## Steps to reproduce a full run
 Use python 2
 
 1. generate a mirror of MEDLINE FTP to a Google Storage Bucket (any other storage provider supported by Python Beam SDK
