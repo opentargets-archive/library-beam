@@ -125,7 +125,7 @@ REQUIRED_PACKAGES = [
     'textacy',
     'unidecode==0.4.21',
     'sklearn==0.0',
-    'google-cloud==0.25.0'
+    'google-cloud==0.25.0',
     'google-cloud-storage==1.2.0',
     'google-cloud-core==0.25.0',
     'google-cloud-bigquery==0.25.0',
@@ -134,7 +134,6 @@ REQUIRED_PACKAGES = [
     'tqdm==4.14.0',
     'nltk==3.2.4',
     'textblob==0.12.0'
-
     # 'en_core_web_md-1.2.1',
 ]
 
