@@ -36,7 +36,7 @@ import en_depent_web_md
 from AbbreviationFinder import AbbreviationsParser
 from BioStopWords import DOMAIN_STOP_WORDS, COMMON_WORDS_CORPUS
 from modules.BioentityTagger import MatchedTag
-spacy.tokens.token.Token
+
 
 
 def create_tokenizer(nlp):

@@ -69,7 +69,8 @@ CUSTOM_COMMANDS = [
      'https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz',
      'nltk'],
 
-    ['python', '-m', 'nltk.downloader', 'brown', 'punkt', 'wordnet', 'averaged_perceptron_tagger', 'conll2000', 'stopwords']
+    ['python', '-m', 'nltk.downloader', 'brown', 'punkt', 'wordnet', 'averaged_perceptron_tagger', 'conll2000',
+     'stopwords']
     # ['wget', 'https://github.com/nltk/nltk_data/archive/gh-pages.zip', '-O', '/root/nltkdata.zip'],
     # ['rm', '-rf', '/root/nltk_data/corpora'],
     # ['unzip', '/root/nltkdata.zip', '-d', '/root/nltk_data/'],
@@ -112,8 +113,15 @@ class CustomCommands(setuptools.Command):
 # so this dependency will not trigger anything to be installed unless a version
 # restriction is specified.
 REQUIRED_PACKAGES = [
-    'apache-beam==2.0.0',
-    # 'google-cloud-dataflow',
+    'six==1.10.0',
+    'protobuf==3.3.0',
+    'apache-beam==2.2.0',
+    'grpcio==1.7.0',
+    'google-cloud-dataflow==2.2.0',
+    # 'google-cloud==0.30.0',
+    # 'google-cloud-storage==1.5.0',
+    # 'google-cloud-core==0.25.0',
+    'google-cloud-bigquery==0.25.0',
     'ftputil==3.3.1',
     'python-dateutil==2.6.0',
     'lxml==3.8.0',
@@ -121,19 +129,18 @@ REQUIRED_PACKAGES = [
     'pyahocorasick==1.1.4',
     'python-Levenshtein==0.12.0',
     'fuzzywuzzy==0.15.0',
-    'requests==2.18.1',
-    'textacy',
+    'requests',
     'unidecode==0.4.21',
+    'scipy==1.0.0',
     'sklearn==0.0',
-    'google-cloud==0.25.0'
-    'google-cloud-storage==1.2.0',
-    'google-cloud-core==0.25.0',
-    'google-cloud-bigquery==0.25.0',
     'rope==0.10.5',
     'elasticsearch==5.4.0',
     'tqdm==4.14.0',
     'nltk==3.2.4',
-    'textblob==0.12.0'
+    'textblob==0.12.0',
+    # 'dill==0.2.6',
+
+
 
     # 'en_core_web_md-1.2.1',
 ]

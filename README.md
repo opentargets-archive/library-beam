@@ -22,8 +22,9 @@ Starting from scratch:
     (sudo) pip install virtualenv
     virtualenv venv
     source venv/bin/activate
-    pip install https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz
+    pip install --upgrade  setuptools pip
     python setup.py install
+    pip install https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz
     ```
 
 * run NLP analytical pipeline
