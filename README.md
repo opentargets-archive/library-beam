@@ -10,9 +10,9 @@ please see the Apache Beam SDK for more info.
 Use python 2
 
 1. generate a mirror of MEDLINE FTP to a Google Storage Bucket (any other storage provider supported by Python Beam SDK
-should work). E.g. using [rclone](https://rclone.org/)
-  - configure rclone with MEDLINE FTP [ftp.ncbi.nlm.nih.gov](ftp://ftp.ncbi.nlm.nih.gov) and your target gcp project (my-gcp-project-buckets)
-    `rclone config`
+   should work). E.g. using [rclone](https://rclone.org/)
+  - configure rclone with MEDLINE FTP [ftp.ncbi.nlm.nih.gov](ftp://ftp.ncbi.nlm.nih.gov) and your target gcp project
+    (my-gcp-project-buckets)  `rclone config`
   - Generate a full mirror:
     `rclone sync medline-ftp:pubmed my-gcp-project-buckets:my-medline-bucket`
   - Update new files:
