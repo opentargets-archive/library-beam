@@ -118,9 +118,6 @@ REQUIRED_PACKAGES = [
     'apache-beam==2.2.0',
     'grpcio==1.7.0',
     'google-cloud-dataflow==2.2.0',
-    # 'google-cloud==0.30.0',
-    # 'google-cloud-storage==1.5.0',
-    # 'google-cloud-core==0.25.0',
     'google-cloud-bigquery==0.25.0',
     'ftputil==3.3.1',
     'python-dateutil==2.6.0',
@@ -138,11 +135,7 @@ REQUIRED_PACKAGES = [
     'tqdm==4.14.0',
     'nltk==3.2.4',
     'textblob==0.12.0',
-    # 'dill==0.2.6',
-
-
-
-    # 'en_core_web_md-1.2.1',
+    'dill==0.2.6',
 ]
 
 setuptools.setup(
