@@ -1,8 +1,15 @@
-# library-beam
-MedLine NLP Analysis Running in Apache Beam
---------------------------------------------
+## Open Targets Library - Analytical Pipeline
 
-* generate a mirror of MEDLINE FTP to a Google Storage Bucket (any other storage provider supported by Python Beam SDK
+# MedLine NLP Analysis Running in Apache Beam
+
+This Pipeline is designed to run with Apache Beam using the dataflow runner.
+It has not been tested with other Beam backends, but it should work there as well pending minimal modifications.
+please see the Apache Beam SDK for more info.
+
+# Steps to reproduce a full run
+Use python 2
+
+1. generate a mirror of MEDLINE FTP to a Google Storage Bucket (any other storage provider supported by Python Beam SDK
 should work). E.g. using [rclone](https://rclone.org/)
   - configure rclone with MEDLINE FTP [ftp.ncbi.nlm.nih.gov](ftp://ftp.ncbi.nlm.nih.gov) and your target gcp project (my-gcp-project-buckets)
     `rclone config`
@@ -12,10 +19,8 @@ should work). E.g. using [rclone](https://rclone.org/)
     `rclone sync medline-ftp:pubmed/updatefiles my-gcp-project-buckets:my-medline-bucket/updatefiles`
 
 
-Use python 2
 
-Starting from scratch:
-* install locally
+2. install the pipeline locally
     ```sh
     git clone https://github.com/opentargets/library-beam
     cd library-beam
@@ -27,7 +32,7 @@ Starting from scratch:
     pip install https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz
     ```
 
-* run NLP analytical pipeline
+3. run NLP analytical pipeline
   ```sh
   python -m main \
       --project your-project \
@@ -45,7 +50,7 @@ Starting from scratch:
 
   ![image](https://user-images.githubusercontent.com/148221/35000427-4e11b818-fadc-11e7-9c2f-08a68eaed37e.png)
 
-* run job to split Enriched JSONs in smaller pieces
+4. run job to split Enriched JSONs in smaller pieces
   ```sh
   python -m main \
       --project open-targets \
@@ -62,7 +67,10 @@ Starting from scratch:
 
   ![image](https://user-images.githubusercontent.com/148221/35000458-6108bb24-fadc-11e7-8a84-452f7b3816f6.png)
 
-* run job load JSONs in Elasticsearch
+  **NOTE**: you can chain step 3 and 4 by adding the option `--output_splitted gs://my-medline-bucket/splitted/pubmed18`
+  to step 3
+
+5. run job load JSONs in Elasticsearch
   ```sh
   python load2es.py publication --es http://myesnode1:9200  --es http://myesnode2:9200
   python load2es.py bioentity --es http://myesnode1:9200  --es http://myesnode2:9200
@@ -80,7 +88,7 @@ Starting from scratch:
   tmux new-session "python load2es.py concept --es http://myesnode1:9200  --es http://myesnode2:9200"
   ```
 
-* OPTIONAL: if needed create appropriate aliases in elasticsearch
+6. OPTIONAL: if needed create appropriate aliases in elasticsearch
 
   ```sh
   curl -XPOST 'http://myesnode1:9200/_aliases' -H 'Content-Type: application/json' -d '
@@ -91,7 +99,7 @@ Starting from scratch:
     } '
   ```
 
-* OPTIONAL: encrease elasticsearch capacity for the adjancency matrix aggregation (used by LINK tool)
+7. OPTIONAL: encrease elasticsearch capacity for the adjancency matrix aggregation (used by LINK tool)
 
   ```sh
   curl -XPUT 'http://myesnode1:9200/pubmed-18-concept/_settings' -H 'Content-Type: application/json' -d'
