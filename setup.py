@@ -117,6 +117,7 @@ REQUIRED_PACKAGES = [
     'protobuf==3.3.0',
     'apache-beam==2.2.0',
     'grpcio==1.7.0',
+    'googleapis-common-protos==1.5.3',
     'google-cloud-dataflow==2.2.0',
     'google-cloud-bigquery==0.25.0',
     'ftputil==3.3.1',
