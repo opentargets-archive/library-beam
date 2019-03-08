@@ -19,6 +19,10 @@ Use python2 with pip and virtualenv
    - Update new files:
      `rclone sync -v medline-ftp:pubmed/updatefiles my-gcp-project-buckets:my-medline-bucket/updatefiles`
   - Note: you can use `--dry-run` argument to test 
+* install tooling
+    ```sh
+    sudo apt-get install python-dev virtualenv build-essential
+    ``` 
 * Download the pipeline 
     ```sh
     git clone https://github.com/opentargets/library-beam
