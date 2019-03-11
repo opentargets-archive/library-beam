@@ -39,7 +39,7 @@ Use python2 with pip and virtualenv
     ```
 * Pin the version of `six` that is used. See https://github.com/benjaminp/six/issues/210 for details of why.
     ```sh
-    pip install 'six=1.10.0'
+    pip install 'six==1.10.0'
     ```
 * Install the pipeline into the virtual environment   
     ```sh 
