@@ -116,3 +116,6 @@ Use python2 with pip and virtualenv
      }'
   ```
 
+## Google Cloud Platform
+
+When controlling this process from a Google cloud machine, make sure it has sufficient scopes enabled.
