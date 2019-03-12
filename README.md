@@ -62,7 +62,7 @@ Use python2 with pip and virtualenv
       --max_num_workers 32 \
       --zone europe-west1-d
   ```
-  This can be monitored via [Google Dataflow](https://console.cloud.google.com/dataflow). Note that "wall time" displayed is not the [usual definition](https://en.wikipedia.org/wiki/Elapsed_real_time) but is per thread and worker. 
+  This can be monitored via [Google Dataflow](https://console.cloud.google.com/dataflow). Note that "wall time" displayed is not the [usual definition](https://en.wikipedia.org/wiki/Elapsed_real_time) but is per thread and worker. In total it takes approximately 2-3h
   ![image](https://user-images.githubusercontent.com/148221/35000427-4e11b818-fadc-11e7-9c2f-08a68eaed37e.png)
   
 * Run job to split Enriched JSONs in smaller pieces
