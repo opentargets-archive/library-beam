@@ -97,6 +97,9 @@ Use python2 with pip and virtualenv
   python load2es.py taggedtext --es http://myesnode1:9200  --es http://myesnode2:9200
   python load2es.py concept --es http://myesnode1:9200  --es http://myesnode2:9200
   ```
+  
+  Note: Elasticsearch must have the International Components for Unicode support plugin installed.i.e. `/usr/share/elasticsearch/bin/elasticsearch-plugin -s install analysis-icu`
+  
   WARNING: the loading scripts takes a lot of time currently, particurlarly the concept one (24h+). It is good to use `screen` or `tmux` or similar, so it will keep going after disconect and can be recovered.  E.g. 
   ```sh
   tmux
