@@ -20,25 +20,25 @@ tmux new-session "python load2es.py publication --es http://myes:9200"
 '''
 
 cache_file = '/tmp/load2es_cache.json'
-INDEX_NAME = 'pubmed-18'
+INDEX_NAME = 'pubmed-19'
 DOC_TYPE = 'publication'
 
 index_config = {
     'bioentity':
         dict(path='_bioentities.json.gz',
-             index='pubmed-18-bioentity',
+             index='pubmed-19-bioentity',
              doc_type='bioentity',
              mappings=None,
              pub_id = True),
     'taggedtext':
         dict(path='_taggedtext.json.gz',
-             index='pubmed-18-taggedtext',
+             index='pubmed-19-taggedtext',
              doc_type='taggedtext',
              mappings=None,
              pub_id = True),
     'publication':
         dict(path='_small.json.gz',
-             index='pubmed-18',
+             index='pubmed-19',
              doc_type='publication',
              mappings='publication.json',
              # mappings=None,
@@ -46,19 +46,19 @@ index_config = {
              ),
     'concept':
         dict(path='_concepts.json.gz',
-             index='pubmed-18-concept',
+             index='pubmed-19-concept',
              doc_type='concept',
              mappings='concept.json',
              pub_id = False),
 
 }
 
-client = storage.Client(project='open-targets')
-bucket = client.get_bucket('medline-json')
+client = storage.Client(project='open-targets-library')
+bucket = client.get_bucket('medline')
 
 '''
 if the data cannot be accessed, make sure this was run
-gsutil iam -r ch allUsers:objectViewer gs://medline-json/
+gsutil iam -r ch allUsers:objectViewer gs://medline/
 '''
 
 
@@ -130,8 +130,8 @@ def load_file(index_, doc_name, file_name):
 
 
 def get_file_names(path):
-    client = storage.Client(project='open-targets')
-    bucket = client.get_bucket('medline-json')
+    client = storage.Client(project='open-targets-library')
+    bucket = client.get_bucket('medline')
 
     for i in bucket.list_blobs(prefix='splitted/'):
         if i.name.endswith(path):
@@ -209,7 +209,7 @@ if __name__ == '__main__':
                 #                       unit_scale=True):
                 #     chunksize = 500
                 #     # threads = 1
-                threads = 4
+                threads = 11
                 for batchiter in grouper(loaded_rows, threads * chunk_size):
                     counter = 0
                     try:
