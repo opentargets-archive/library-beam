@@ -48,8 +48,8 @@ Use python2 with pip and virtualenv
     pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.2.0/en_core_web_lg-2.2.0.tar.gz
     ```
 * Run NLP analytical pipeline
-  ```sh
-python -m main \
+  ```sH
+  python -m main \
     --project open-targets-library \
     --job_name medline201911analytical \
     --runner DataflowRunner \
@@ -63,6 +63,7 @@ python -m main \
     --region europe-west1 \
     --zone europe-west1-d
   ```
+  
   This can be monitored via [Google Dataflow](https://console.cloud.google.com/dataflow). Note that "wall time" displayed is not the [usual definition](https://en.wikipedia.org/wiki/Elapsed_real_time) but is per thread and worker. 
   
   In total it takes approximately 2-3h.
