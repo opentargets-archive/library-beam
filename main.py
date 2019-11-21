@@ -7,8 +7,8 @@ import logging
 from datetime import date, datetime
 
 import apache_beam as beam
-import en_depent_web_md
-# import en_core_web_md
+#import en_depent_web_md as en_model
+import en_core_web_lg as en_model
 import nltk
 import spacy
 from apache_beam.coders import coders
@@ -23,8 +23,7 @@ from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.options.pipeline_options import SetupOptions
 from dateutil.parser import parse
 from lxml import etree, objectify
-from spacy.language_data import TOKENIZER_INFIXES
-from spacy.tokenizer import Tokenizer
+from spacy.lang.punctuation import TOKENIZER_INFIXES
 
 from modules.BioentityTagger import BioEntityTagger
 from modules.NLP import NounChuncker, DocumentAnalysisSpacy
@@ -181,7 +180,7 @@ class _MedlineTextSource(_TextSource):
                     break
 
 
-class ReadMedlineFiles(beam.PTransform):
+class ReadMedlineFiles(beam.transforms.PTransform):
     """A PTransform for reading text files.
 
     Parses a text file as newline-delimited elements, by default assuming
@@ -434,14 +433,14 @@ def get_text_to_analyze(publication):
     return u''
 
 
-class MedlineXMLParser(beam.DoFn):
+class MedlineXMLParser(beam.transforms.DoFn):
     def process(self, element, *args, **kwargs):
         rec, file_name = element
         for parsed_record in parse_medline_xml(rec, file_name):
             yield parsed_record['pub_id'], parsed_record
 
 
-class TagBioEntity(beam.DoFn):
+class TagBioEntity(beam.transforms.DoFn):
     def process(self, element, *args, **kwargs):
         if element:
             text_to_match = get_text_to_analyze(element)
@@ -467,7 +466,7 @@ class TagBioEntity(beam.DoFn):
         self.tagger = BioEntityTagger()
 
 
-class NLPAnalysis(beam.DoFn):
+class NLPAnalysis(beam.transforms.DoFn):
     def process(self, element, *args, **kwargs):
         element['text_mined_entities'] = {}
 
@@ -546,18 +545,17 @@ class NLPAnalysis(beam.DoFn):
         #
         # return Tokenizer(nlp.vocab, {}, prefixe_re.search, suffixe_re.search,
         #                  infix_re.finditer)
-        return Tokenizer(nlp.vocab, {}, nlp.tokenizer.prefix_search, nlp.tokenizer.suffix_search,
+        return spacy.tokenizer.Tokenizer(nlp.vocab, {}, nlp.tokenizer.prefix_search, nlp.tokenizer.suffix_search,
                          infix_re.finditer)
 
     @staticmethod
     def _init_spacy_english_language():
-        # nlp = en_core_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
-        nlp = en_depent_web_md.load(create_make_doc=NLPAnalysis._create_tokenizer)
+        nlp = en_model.load(create_make_doc=NLPAnalysis._create_tokenizer)
         # nlp.vocab.strings.set_frozen(True)
         return nlp
 
 
-class ToJSON(beam.DoFn):
+class ToJSON(beam.transforms.DoFn):
     def process(self, element, *args, **kwargs):
         try:
             yield json.dumps(element,
@@ -571,7 +569,7 @@ class ToJSON(beam.DoFn):
             nltk.pprint(element)
 
 
-class GetLatestVersion(beam.DoFn):
+class GetLatestVersion(beam.transforms.DoFn):
     ''' gets a lsit of records grouped by PubmedID and yield its latest version
     according to the file name it was read from'''
 
@@ -585,7 +583,7 @@ class GetLatestVersion(beam.DoFn):
                 yield versions[0]
 
 
-class ExtractConcepts(beam.DoFn):
+class ExtractConcepts(beam.transforms.DoFn):
     def process(self, element, *args, **kwargs):
         parsed_element = json.loads(element)
         try:
@@ -643,7 +641,7 @@ class ExtractConcepts(beam.DoFn):
             logging.exception('cannot extract concepts form article')
 
 
-class ExtractBioentities(beam.DoFn):
+class ExtractBioentities(beam.transforms.DoFn):
     def process(self, element, *args, **kwargs):
         parsed_element = json.loads(element)
         try:
@@ -659,7 +657,7 @@ class ExtractBioentities(beam.DoFn):
             logging.exception('cannot extract bioentities form article')
 
 
-class ExtractTaggedText(beam.DoFn):
+class ExtractTaggedText(beam.transforms.DoFn):
     def process(self, element, *args, **kwargs):
         parsed_element = json.loads(element)
         try:
@@ -686,7 +684,7 @@ class ExtractTaggedText(beam.DoFn):
             logging.exception('cannot extract tagged text form article')
 
 
-class CleanPublication(beam.DoFn):
+class CleanPublication(beam.transforms.DoFn):
     def process(self, element, *args, **kwargs):
         parsed_element = json.loads(element)
         try:
@@ -714,12 +712,12 @@ class CleanPublication(beam.DoFn):
                          )
 
 
-class Print(beam.DoFn):
+class Print(beam.transforms.DoFn):
     def process(self, element, *args, **kwargs):
         print element
 
 
-class Consume(beam.DoFn):
+class Consume(beam.transforms.DoFn):
     def process(self, element, *args, **kwargs):
         pass
 

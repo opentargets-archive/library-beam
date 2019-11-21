@@ -45,23 +45,25 @@ Use python2 with pip and virtualenv
     ```sh 
     python setup.py install
     #note this needs between 3.75GB and 7.5GB RAM
-    pip install https://github.com/explosion/spacy-models/releases/download/en_depent_web_md-1.2.1/en_depent_web_md-1.2.1.tar.gz
+    pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.2.0/en_core_web_lg-2.2.0.tar.gz
     ```
 * Run NLP analytical pipeline
-  ```sh
+  ```sH
   python -m main \
-      --project your-project \
-      --job_name medline-nlp\
-      --runner DataflowRunner \
-      --temp_location gs://my-tmp-bucket/temp \
-      --setup_file ./setup.py \
-      --worker_machine_type n1-highmem-32 \
-      --input_baseline gs://my-medline-bucket/baseline/pubmed18n*.xml.gz \
-      --input_updates gs://my-medline-bucket/updatefiles/pubmed18n*.xml.gz \
-      --output_enriched gs://my-medline-bucket-output/analyzed/pubmed18 \
-      --max_num_workers 32 \
-      --zone europe-west1-d
+    --project open-targets-library \
+    --job_name medline201911analytical \
+    --runner DataflowRunner \
+    --temp_location gs://medline_2019_11/temp \
+    --setup_file ./setup.py \
+    --worker_machine_type n1-highmem-32 \
+    --input_baseline gs://medline_2019_11/baseline/pubmed19n000*.xml.gz \
+    --input_updates gs://medline_2019_11/updatefiles/pubmed19n097*.xml.gz \
+    --output_enriched gs://medline_2019_11/analyzed/pubmed19 \
+    --max_num_workers 32 \
+    --region europe-west1 \
+    --zone europe-west1-d
   ```
+  
   This can be monitored via [Google Dataflow](https://console.cloud.google.com/dataflow). Note that "wall time" displayed is not the [usual definition](https://en.wikipedia.org/wiki/Elapsed_real_time) but is per thread and worker. 
   
   In total it takes approximately 2-3h.
@@ -70,17 +72,18 @@ Use python2 with pip and virtualenv
   
 * Run job to split Enriched JSONs in smaller pieces
   ```sh
-  python -m main \
-      --project open-targets \
-      --job_name open-targets-medline-process-split\
-      --runner DataflowRunner \
-      --temp_location gs://my-tmp-bucket/temp \
-      --setup_file ./setup.py \
-      --worker_machine_type n1-highmem-16 \
-      --input_enriched gs://my-medline-bucket/analyzed/pubmed18*_enriched.json.gz \
-      --output_splitted gs://my-medline-bucket/splitted/pubmed18 \
-      --max_num_workers 32 \
-      --zone europe-west1-d
+python -m main \
+    --project open-targets-library \
+    --job_name medline201911split \
+    --runner DataflowRunner \
+    --temp_location gs://medline_2019_11/temp \
+    --setup_file ./setup.py \
+    --worker_machine_type n1-highmem-16 \
+    --input_enriched gs://medline_2019_11/analyzed/pubmed19*_enriched.json.gz \
+    --output_splitted gs://medline_2019_11/splitted/pubmed19 \
+    --max_num_workers 32 \
+    --region europe-west1 \
+    --zone europe-west1-d
   ```
   This can be monitored via [Google Dataflow](https://console.cloud.google.com/dataflow). Note that "wall time" displayed is not the [usual definition](https://en.wikipedia.org/wiki/Elapsed_real_time) but is per thread and worker.
   
