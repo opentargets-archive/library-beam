@@ -108,8 +108,10 @@ class CustomCommands(setuptools.Command):
 # so this dependency will not trigger anything to be installed unless a version
 # restriction is specified.
 # Note numpy >=1.17 is python3 only
+# Note more-itertools >=6.0.0 is python3 only
 REQUIRED_PACKAGES = [
     'numpy==1.16.5',
+    'more-itertools==5.0.0',
     'apache-beam[gcp]==2.16.0',
     'spacy==2.2.2',
     'python-Levenshtein==0.12.0',
