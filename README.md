@@ -21,7 +21,7 @@ Use python2 with pip and virtualenv
   - Note: you can use `--dry-run` argument to test 
 * install tooling
     ```sh
-    sudo apt-get install python-dev virtualenv build-essential git
+    sudo apt-get install python-dev virtualenv build-essential git libxml2-dev libxslt-dev
     ``` 
 * Download the pipeline 
     ```sh
