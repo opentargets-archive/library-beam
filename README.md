@@ -33,14 +33,6 @@ Use python2 with pip and virtualenv
     virtualenv venv --python=python2
     source venv/bin/activate
     ```
-* Pin the version of Pip that is used. This is because apache-beam 2.2.0 uses `pip install --download` which was replaced with `pip download` from 8.0.0 and removed in 10.0.0
-    ```sh 
-    pip install 'pip==9.0.3'
-    ```
-* Pin the version of `six` that is used. See https://github.com/benjaminp/six/issues/210 for details of why.
-    ```sh
-    pip install 'six==1.10.0'
-    ```
 * Install the pipeline into the virtual environment   
     ```sh 
     python setup.py install
