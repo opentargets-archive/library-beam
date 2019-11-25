@@ -21,7 +21,7 @@ Use python2 with pip and virtualenv
   - Note: you can use `--dry-run` argument to test 
 * install tooling
     ```sh
-    sudo apt-get install python-dev virtualenv build-essential git libxml2-dev libxslt-dev zlib1g-dev
+    sudo apt-get install python-dev virtualenv build-essential git libxml2-dev libxslt-dev zlib1g-dev tmux
     ``` 
 * Download the pipeline 
     ```sh
@@ -39,18 +39,19 @@ Use python2 with pip and virtualenv
     #note this needs between 3.75GB and 7.5GB RAM
     pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.2.0/en_core_web_lg-2.2.0.tar.gz
     ```
-* Run NLP analytical pipeline
+* Run pipeline
   ```sH
   python -m main \
     --project open-targets-library \
-    --job_name medline201911analytical \
+    --job_name medline201911 \
     --runner DataflowRunner \
     --temp_location gs://medline_2019_11/temp \
     --setup_file ./setup.py \
     --worker_machine_type n1-highmem-32 \
-    --input_baseline gs://medline_2019_11/baseline/pubmed19n000*.xml.gz \
-    --input_updates gs://medline_2019_11/updatefiles/pubmed19n097*.xml.gz \
+    --input_baseline gs://medline_2019_11/baseline/pubmed19n*.xml.gz \
+    --input_updates gs://medline_2019_11/updatefiles/pubmed19n*.xml.gz \
     --output_enriched gs://medline_2019_11/analyzed/pubmed19 \
+    --output_splitted gs://medline_2019_11/splitted/pubmed19 \
     --max_num_workers 32 \
     --region europe-west1 \
     --zone europe-west1-d
@@ -58,33 +59,12 @@ Use python2 with pip and virtualenv
   
   This can be monitored via [Google Dataflow](https://console.cloud.google.com/dataflow). Note that "wall time" displayed is not the [usual definition](https://en.wikipedia.org/wiki/Elapsed_real_time) but is per thread and worker. 
   
-  In total it takes approximately 2-3h.
+  In total it takes approximately 4h.
   
   ![image](https://user-images.githubusercontent.com/148221/35000427-4e11b818-fadc-11e7-9c2f-08a68eaed37e.png)
-  
-* Run job to split Enriched JSONs in smaller pieces
-  ```sh
-python -m main \
-    --project open-targets-library \
-    --job_name medline201911split \
-    --runner DataflowRunner \
-    --temp_location gs://medline_2019_11/temp \
-    --setup_file ./setup.py \
-    --worker_machine_type n1-highmem-16 \
-    --input_enriched gs://medline_2019_11/analyzed/pubmed19*_enriched.json.gz \
-    --output_splitted gs://medline_2019_11/splitted/pubmed19 \
-    --max_num_workers 32 \
-    --region europe-west1 \
-    --zone europe-west1-d
-  ```
-  This can be monitored via [Google Dataflow](https://console.cloud.google.com/dataflow). Note that "wall time" displayed is not the [usual definition](https://en.wikipedia.org/wiki/Elapsed_real_time) but is per thread and worker.
-  
-  In total it takes approximately 1-2h.
-  
+    
   ![image](https://user-images.githubusercontent.com/148221/35000458-6108bb24-fadc-11e7-8a84-452f7b3816f6.png)
   
-  **NOTE**: you can chain the analytical and the split steps by adding the option `--output_splitted gs://my-medline-bucket/splitted/pubmed18`
-  to the analytical step
 * Run job load JSONs in Elasticsearch
   ```sh
   python load2es.py publication --es http://myesnode1:9200  --es http://myesnode2:9200
