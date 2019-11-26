@@ -90,7 +90,7 @@ discovery:
 path:
   logs: /mnt/disks/disk2/log
   data: /mnt/disks/disk2/data
-cluster.name: library
+cluster.name: library201911
 node.name: ${HOSTNAME}
 network.host: 0.0.0.0
 http.port: 9200
