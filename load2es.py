@@ -54,7 +54,7 @@ index_config = {
 }
 
 client = storage.Client(project='open-targets-library')
-bucket = client.get_bucket('medline')
+bucket = client.get_bucket('medline_2019_11')
 
 '''
 if the data cannot be accessed, make sure this was run
