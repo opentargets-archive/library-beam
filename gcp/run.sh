@@ -33,7 +33,7 @@ gcloud beta compute --project=$PROJECT \
 #create a healthcheck
 #used by autohealing and load balancing
 #check for 10s every 10s each 6 times for 1m total
-gcloud beta compute --project=$PROJECT \
+gcloud compute --project=$PROJECT \
   health-checks create http $NAME \
     --request-path="/_nodes/_local" \
     --port=9200 \
