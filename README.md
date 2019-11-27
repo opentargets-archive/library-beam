@@ -65,7 +65,17 @@ Use python2 with pip and virtualenv
     
   ![image](https://user-images.githubusercontent.com/148221/35000458-6108bb24-fadc-11e7-8a84-452f7b3816f6.png)
   
-* Run job load JSONs in Elasticsearch
+## Steps to load the JSONs dump into ElasticSearch
+  
+  The directory gcp contains the infrastructure scripts to generate the Elasticsearch cluster.
+    
+  * Create a virtual environment to manage dependencies in
+    ```sh
+    virtualenv venv_elasticsearch --python=python2
+    source venv_elasticsearch/bin/activate
+    pip install -r venv_elasticsearch.txt
+    ```
+  * Run job load JSONs in Elasticsearch
   ```sh
   python load2es.py publication --es http://myesnode1:9200  --es http://myesnode2:9200
   python load2es.py bioentity --es http://myesnode1:9200  --es http://myesnode2:9200
