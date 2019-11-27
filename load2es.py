@@ -131,7 +131,7 @@ def load_file(index_, doc_name, file_name):
 
 def get_file_names(path):
     client = storage.Client(project='open-targets-library')
-    bucket = client.get_bucket('medline')
+    bucket = client.get_bucket('medline_2019_11')
 
     for i in bucket.list_blobs(prefix='splitted/'):
         if i.name.endswith(path):
