@@ -65,7 +65,7 @@ Use python2 with pip and virtualenv
     
   ![image](https://user-images.githubusercontent.com/148221/35000458-6108bb24-fadc-11e7-8a84-452f7b3816f6.png)
   
-## Steps to load the JSONs dump into ElasticSearch
+## Steps to load the JSON dumps into ElasticSearch
   
   The directory gcp contains the infrastructure scripts to generate the Elasticsearch cluster.
     
