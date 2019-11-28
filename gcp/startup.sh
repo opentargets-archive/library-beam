@@ -86,7 +86,7 @@ cloud:
 discovery:
   zen:
     hosts_provider: gce
-    minimum_master_nodes: 6
+    minimum_master_nodes: 18
 path:
   logs: /mnt/disks/disk2/log
   data: /mnt/disks/disk2/data
