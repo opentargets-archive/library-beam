@@ -1,6 +1,6 @@
 {
   "settings": {
-    "number_of_shards": 33,
+    "number_of_shards": 148,
     "number_of_replicas": 0,
     "analysis": {
       "filter": {

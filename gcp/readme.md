@@ -7,17 +7,7 @@ Setup a local environment variable for convienience
 HOST=es-190313-102133
 ```
 
-Required for LINK to work properly
-```sh
-time curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-19-concept/_settings" -H 'Content-Type: application/json' -d'
-   {
-      "index" : {
-          "max_adjacency_matrix_filters" : 500
-          }
-   }'
-```
-
-Increase the threshold for "breakers" to help prevent falst triggers
+Increase the threshold for "breakers" to help prevent false triggers
 ```sh
 time curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
    {
@@ -41,10 +31,20 @@ curl "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/
 To set a default number of shards create a "template" for future indexes before creating any
 ```sh
 curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/_template/default" -H 'Content-Type: application/json' \
--d'{"template":"*","settings":{"number_of_shards":11}}'
+-d'{"template":"*","settings":{"number_of_shards":37}}'
 ```
 
 To actually do the loading
 ```
 time python load2es.py bioentity taggedtext publication concept --es "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200"
+```
+
+Required for LINK to work properly
+```sh
+time curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-19-concept/_settings" -H 'Content-Type: application/json' -d'
+   {
+      "index" : {
+          "max_adjacency_matrix_filters" : 500
+          }
+   }'
 ```

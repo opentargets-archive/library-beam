@@ -86,11 +86,11 @@ cloud:
 discovery:
   zen:
     hosts_provider: gce
-    minimum_master_nodes: 6
+    minimum_master_nodes: 18
 path:
   logs: /mnt/disks/disk2/log
   data: /mnt/disks/disk2/data
-cluster.name: library201911
+cluster.name: library201911v2
 node.name: ${HOSTNAME}
 network.host: 0.0.0.0
 http.port: 9200

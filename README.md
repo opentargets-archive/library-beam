@@ -76,33 +76,16 @@ Use python2 with pip and virtualenv
     pip install -r venv_elasticsearch.txt
     ```
   * Run job load JSONs in Elasticsearch
+
+  WARNING: the loading scripts takes a lot of time currently, particurlarly the concept one (24h+). It is good to use `screen` or `tmux` or similar, so it will keep going after disconect and can be recovered.  
+
   ```sh
-  python load2es.py publication --es http://myesnode1:9200  --es http://myesnode2:9200
-  python load2es.py bioentity --es http://myesnode1:9200  --es http://myesnode2:9200
-  python load2es.py taggedtext --es http://myesnode1:9200  --es http://myesnode2:9200
-  python load2es.py concept --es http://myesnode1:9200  --es http://myesnode2:9200
+  python load2es.py publication bioentity taggedtext concept --es http://es:9200
   ```
   
   Note: Elasticsearch must have the International Components for Unicode support plugin installed.i.e. `/usr/share/elasticsearch/bin/elasticsearch-plugin -s install analysis-icu`
-  
-  WARNING: the loading scripts takes a lot of time currently, particurlarly the concept one (24h+). It is good to use `screen` or `tmux` or similar, so it will keep going after disconect and can be recovered.  E.g. 
-  ```sh
-  tmux
-  tmux new-session "time -p python load2es.py publication --es http://be-es-debian-3n-node01:39200 --es http://be-es-debian-3n-node02:39200 --es http://be-es-debian-3n-node03:39200 "
-  tmux new-session "time -p python load2es.py bioentity --es http://be-es-debian-3n-node01:39200 --es http://be-es-debian-3n-node02:39200 --es http://be-es-debian-3n-node03:39200 "
-  tmux new-session "time -p python load2es.py taggedtext --es http://be-es-debian-3n-node01:39200 --es http://be-es-debian-3n-node02:39200 --es http://be-es-debian-3n-node03:39200 "
-  tmux new-session "time -p python load2es.py concept --es http://be-es-debian-3n-node01:39200 --es http://be-es-debian-3n-node02:39200 --es http://be-es-debian-3n-node03:39200 "
-  ```
-* OPTIONAL: If needed create appropriate aliases in elasticsearch
-  ```sh
-  curl -XPOST 'http://myesnode1:9200/_aliases' -H 'Content-Type: application/json' -d '
-    {
-        "actions": [
-            {"add": {"index": "pubmed-18", "alias": "!publication-data"}}
-        ]
-    } '
-  ```
-* OPTIONAL: Increase elasticsearch capacity for the adjancency matrix aggregation (used by LINK tool)
+
+* Increase elasticsearch capacity for the adjancency matrix aggregation (used by LINK tool)
   ```sh
   curl -XPUT 'http://myesnode1:9200/pubmed-18-concept/_settings' -H 'Content-Type: application/json' -d'
      {
