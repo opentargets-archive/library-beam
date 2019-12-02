@@ -75,7 +75,7 @@ EOF_C
 
 #configure elasticseach JVM
 cat > /etc/elasticsearch/jvm.options <<EOF_C 
--Xms1g
+-Xms31g
 -Xmx31g
 #default elasticsearch settings
 -XX:+UseConcMarkSweepGC
