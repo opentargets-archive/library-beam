@@ -1,25 +1,3 @@
-#format the disk
-mkfs.ext4 -m 0 -F -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/sdb
-
-#make a directory to put it in
-mkdir -p /mnt/disks/disk2
-
-#actually mount
-mount -o discard,defaults /dev/sdb /mnt/disks/disk2
-
-#make it world writable
-chmod a+w /mnt/disks/disk2
-
-#make places to put stuff
-mkdir -p /mnt/disks/disk2/data
-mkdir -p /mnt/disks/disk2/log
-
-#make them writable
-chmod -R a+w /mnt/disks/disk2
-
-
-
-
 #initial setup
 #-------------
 
@@ -86,11 +64,13 @@ cloud:
 discovery:
   zen:
     hosts_provider: gce
-    minimum_master_nodes: 18
-path:
-  logs: /mnt/disks/disk2/log
-  data: /mnt/disks/disk2/data
-cluster.name: library201911v2
+    minimum_master_nodes: 3
+indices.store.throttle.max_bytes_per_sec: "200mb"
+index.refresh_interval: "-1"
+index.translog.flush_threshold_size: "1000mb"
+index.number_of_replicas: 0
+index.number_of_shards: 8
+cluster.name: library201911v3
 node.name: ${HOSTNAME}
 network.host: 0.0.0.0
 http.port: 9200
@@ -99,8 +79,8 @@ EOF_C
 
 #configure elasticseach JVM
 cat > /etc/elasticsearch/jvm.options <<EOF_C 
--Xms6g
--Xmx6g
+-Xms1g
+-Xmx31g
 #default elasticsearch settings
 -XX:+UseConcMarkSweepGC
 -XX:CMSInitiatingOccupancyFraction=75
