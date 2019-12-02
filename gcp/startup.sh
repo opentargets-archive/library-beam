@@ -66,11 +66,7 @@ discovery:
     hosts_provider: gce
     minimum_master_nodes: 3
 indices.store.throttle.max_bytes_per_sec: "200mb"
-index.refresh_interval: "-1"
-index.translog.flush_threshold_size: "1000mb"
-index.number_of_replicas: 0
-index.number_of_shards: 8
-cluster.name: library201911v3
+cluster.name: library201911v4
 node.name: ${HOSTNAME}
 network.host: 0.0.0.0
 http.port: 9200
