@@ -1,0 +1,8 @@
+{
+  "settings": {
+    "number_of_shards": 40,
+    "refresh_interval": "-1",
+    "translog.flush_threshold_size": "1000mb",
+    "number_of_replicas": 0
+  }
+}
