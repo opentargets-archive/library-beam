@@ -68,7 +68,7 @@ discovery:
     hosts_provider: gce
     minimum_master_nodes: 3
 indices.store.throttle.max_bytes_per_sec: "200mb"
-cluster.name: library201911v5
+cluster.name: library201911v6
 node.name: ${HOSTNAME}
 network.host: 0.0.0.0
 http.port: 9200
