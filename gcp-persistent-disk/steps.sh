@@ -6,7 +6,7 @@
 export HOST=es-191209-112649
 
 curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/_template/default" -H 'Content-Type: application/json' \
--d'{"template":"*","settings":{"number_of_shards":40}}' 
+-d'{"template":"*","settings":{"number_of_shards":24}}' 
 
 mkdir loader
 cd loader
