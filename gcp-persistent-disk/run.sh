@@ -26,7 +26,7 @@ gcloud --project=$PROJECT \
 #NOTE this is a BETA command and liable to change in future!
 gcloud beta compute --project=$PROJECT \
   instance-groups managed create $NAME \
-    --size=5 \
+    --size=3 \
     --template=$NAME \
     --zone=europe-west1-d 
 
