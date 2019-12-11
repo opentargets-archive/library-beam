@@ -80,3 +80,5 @@ The index es_concept.sh is slightly different due the id-field value
 
 time for file in $(cat ${input}); do gsutil cat $file | gunzip | elasticsearch_loader --es-host "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.int
 ernal:9200" --with-retry --bulk-size 10000 --index pubmed-19-concept --type concept json --json-lines - ; done
+
+There are some examples under "tmux_example"
