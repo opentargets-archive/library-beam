@@ -1,0 +1,1 @@
+time for file in $(cat ${input}); do gsutil cat $file | gunzip | elasticsearch_loader --es-host "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200" --with-retry --bulk-size 10000 --index pubmed-19-bioentity --type bioentity --id-field pub_id json --json-lines - ; done
