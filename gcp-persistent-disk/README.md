@@ -17,7 +17,7 @@ gcloud beta compute --project=$PROJECT \
 
 The file startup.sh is used by run.sh for creating the instance template.
 
-In order to create a new version the user must change the parameter "cluster.name" and if the number of VMs changes the parameter "minimum_master_nodes" must be number_of_total_vm/2+1. (The number of VMs should be odd)
+In order to create a new version the user must change the parameter "cluster.name" (ES cluster) and if the number of VMs (run.sh) changes the parameter "minimum_master_nodes" must be number_of_total_vm/2+1. (The number of VMs should be odd)
 
 discovery:
   zen:
@@ -25,3 +25,6 @@ discovery:
     minimum_master_nodes: 2
 indices.store.throttle.max_bytes_per_sec: "200mb"
 cluster.name: library201911v7
+
+
+## Load the data in ES
