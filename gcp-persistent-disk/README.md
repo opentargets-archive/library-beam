@@ -28,3 +28,23 @@ cluster.name: library201911v7
 
 
 ## Load the data in ES
+The infrastructure scripts generates a DNS name.
+In google cloud these info are stored under  Network services > Load balancing
+
+Eg
+[SERVICE_LABEL].[FORWARDING_RULE_NAME].il4.[REGION].lb.[PROJECT_ID].internal
+
+To test if the cluster is available and correct:
+
+> export $HOST= _[SERVICE_LABEL]_
+> curl http://$HOST.$HOST.il4.europe-west1.lb.open-targets-af.internal:9200
+>
+> curl -X GET "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-af.internal:9200/_cat/nodes?v&s=name"
+> curl -X GET "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-af.internal:9200/_cluster/health?pretty"
+
+The script "steps.sh" contains the steps to load the data into the ES.
+
+This is a prototype of infrastructure and the aim is builing a list of commands to run.
+
+In future, we aim to create an automatic script.
+
