@@ -106,7 +106,7 @@ def json_serialize(obj):
 
 class _MedlineTextSource(_TextSource):
     def read_records(self, file_path, range_tracker):
-        logging.info(file_path)
+        logging.info("File info:"+file_path)
         file_name = file_path.split('/')[-1]
         record = []
         skip = True
@@ -382,6 +382,7 @@ def parse_article_info(article, publication):
 
         if e.tag == 'PublicationTypeList':
             pub_types = []
+            logging.debug(e.PublicationType)
             for pub_type in e.PublicationType:
                 pub_types.append(pub_type.text)
             publication['pub_types'] = pub_types
