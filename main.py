@@ -106,7 +106,7 @@ def json_serialize(obj):
 
 class _MedlineTextSource(_TextSource):
     def read_records(self, file_path, range_tracker):
-        logging.info("File info:"+file_path)
+        logging.error("File info:"+file_path)
         print("File info:"+file_path)
         file_name = file_path.split('/')[-1]
         record = []
@@ -383,12 +383,15 @@ def parse_article_info(article, publication):
 
         if e.tag == 'PublicationTypeList':
             pub_types = []
-            logging.debug(e.PublicationType)
-            print("publication")
-            print(e.PublicationType)
-            for pub_type in e.PublicationType:
-                pub_types.append(pub_type.text)
-            publication['pub_types'] = pub_types
+            logging.error(e.PublicationType)
+            try:
+                for pub_type in e.PublicationType:
+                    pub_types.append(pub_type.text)
+                publication['pub_types'] = pub_types
+            except Exception:
+                logging.error(e.PublicationType)
+                logging.error(e.tag)
+                exit(1)
 
         if e.tag == 'ELocationID' and e.attrib['EIdType'] == 'doi':
             publication['doi'] = e.text
@@ -753,7 +756,6 @@ def run(argv=None):
     # We use the save_main_session option because one or more DoFn's in this
     # workflow rely on global context (e.g., a module imported at module level).
     logging.error("BREAK HERE")
-    exit(1)
     pipeline_options = PipelineOptions(pipeline_args)
     pipeline_options.view_as(SetupOptions).save_main_session = True
     with beam.Pipeline(options=pipeline_options) as p:
