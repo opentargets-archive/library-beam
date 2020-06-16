@@ -389,9 +389,7 @@ def parse_article_info(article, publication):
                 logging.error("assign")
                 publication['pub_types'] = pub_types
             else:
-                logging.error("Publication:"+ publication)
                 logging.error("Cinzia publicationType not found")
-                exit(1)
 
 
         if e.tag == 'ELocationID' and e.attrib['EIdType'] == 'doi':
