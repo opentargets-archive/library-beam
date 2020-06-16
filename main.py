@@ -383,13 +383,13 @@ def parse_article_info(article, publication):
         if e.tag == 'PublicationTypeList':
             pub_types = []
             if "PublicationType" in e:
-                logging.warnings("prima del for:")
+                logging.error("prima del for:")
                 for pub_type in e.PublicationType:
                     pub_types.append(pub_type.text)
                 logging.error("assign")
                 publication['pub_types'] = pub_types
             else:
-                logging.warnings("Author:"+ e.Author)
+                logging.error("Article:"+ e.ArticleTitle)
                 logging.error("Cinzia publicationType not found")
                 exit(1)
 
