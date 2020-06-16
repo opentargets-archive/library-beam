@@ -752,6 +752,8 @@ def run(argv=None):
     bq_table_schema = parse_bq_json_schema(json.loads(BQ_SCHEMA))
     # We use the save_main_session option because one or more DoFn's in this
     # workflow rely on global context (e.g., a module imported at module level).
+    logging.error("BREAK HERE")
+    exit(1)
     pipeline_options = PipelineOptions(pipeline_args)
     pipeline_options.view_as(SetupOptions).save_main_session = True
     with beam.Pipeline(options=pipeline_options) as p:
