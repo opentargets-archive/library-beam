@@ -389,8 +389,10 @@ def parse_article_info(article, publication):
                     pub_types.append(pub_type.text)
                 publication['pub_types'] = pub_types
             except Exception:
-                logging.error(e.PublicationType)
-                logging.error(e.tag)
+                logging.error("PublicationType"+ e.PublicationType)
+                logging.error("E.tag"+e.tag)
+                logging.error("e"+e.text)
+                logging.error("e"+ e)
                 exit(1)
 
         if e.tag == 'ELocationID' and e.attrib['EIdType'] == 'doi':
