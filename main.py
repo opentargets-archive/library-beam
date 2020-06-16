@@ -382,10 +382,14 @@ def parse_article_info(article, publication):
 
         if e.tag == 'PublicationTypeList':
             pub_types = []
-            logging.error("before for"+ e.PublicationType)
+            logging.warning("Author: "+ e.Author )
+            logging.error("before : "+ e.PublicationType)
             try:
+                logging.warnings("prima del for:")
                 for pub_type in e.PublicationType:
+                    logging.error("dentro il for")
                     pub_types.append(pub_type.text)
+                logging.error("assign")
                 publication['pub_types'] = pub_types
             except Exception:
                 logging.error("PublicationType"+ e.PublicationType)
