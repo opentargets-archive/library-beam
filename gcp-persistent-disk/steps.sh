@@ -54,7 +54,7 @@ do
    echo $windowName
    tmux new-session -d -s ${windowName}
    tmux send-keys -t ${windowName} "source ~/library-beam/venv_elastic/bin/activate" Enter
-   tmux send-keys -t ${windowName} "export HOST=es-191209-112649" Enter
+   tmux send-keys -t ${windowName} "export HOST=es-200617-101804" Enter
    tmux send-keys -t ${windowName} "export input=${f}; ./es_tag.sh" Enter
 done
 
