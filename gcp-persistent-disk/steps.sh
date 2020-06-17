@@ -60,7 +60,7 @@ done
 
 # es_tag.sh
 time for file in $(cat ${input}); do gsutil cat $file | gunzip | elasticsearch_loader --es-host "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.int
-ernal:9200" --with-retry --bulk-size 10000 --index pubmed-19-taggedtext --type taggedtext --id-field pub_id json --json-lines - ; done
+ernal:9200" --with-retry --bulk-size 10000 --index pubmed-20-taggedtext --type taggedtext --id-field pub_id json --json-lines - ; done
 
 #Kill the list of tmux opened
 #!/bin/bash
@@ -75,7 +75,7 @@ done
 
 # Changed the refresh interval
 export HOST=dns_name_param
-curl -XPUT 'http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-19-taggedtex/_settings' -d '{"index":{"refresh_interval":"1s”}}'
+curl -XPUT 'http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20-taggedtext/_settings' -d '{"index":{"refresh_interval":"1s”}}'
 
 
 #### IMPORTANT 
