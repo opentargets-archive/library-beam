@@ -1,9 +1,9 @@
 # DNS name 
-# Eg.  http://es-191206-133204.es-191206-133204.il4.europe-west1.lb.open-targets-library.internal:9200
-# HOST=es-191206-133204
+# Eg.  http://es-201206-133204.es-201206-133204.il4.europe-west1.lb.open-targets-library.internal:9200
+# HOST=es-200617-101804
 # curl -X GET http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200
 
-export HOST=es-191209-112649
+export HOST=es-200617-101804
 
 # the number of shard is related with CPU and VMS. Eg. 3VMsx8cpu=24
 curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/_template/default" -H 'Content-Type: application/json' \
@@ -17,18 +17,21 @@ curl  -X GET https://raw.githubusercontent.com/opentargets/library-beam/master/e
 curl  -X GET https://raw.githubusercontent.com/opentargets/library-beam/master/es-mapping-index/publication.json > publication.json
 curl  -X GET https://raw.githubusercontent.com/opentargets/library-beam/master/es-mapping-index/settings.json > settings.json
 
-curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-19-taggedtext?pretty" -H 'Content-Type: application/json' -d@"settings.json"
-curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-19-bioentity?pretty" -H 'Content-Type: application/json' -d@"settings.json"
-curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-19?pretty" -H 'Content-Type: application/json' -d@"publication.json"
-curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-19-concept?pretty" -H 'Content-Type: application/json' -d@"concept.json"
+curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20-taggedtext?pretty" -H 'Content-Type: application/json' -d@"settings.json"
+curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20-bioentity?pretty" -H 'Content-Type: application/json' -d@"settings.json"
+curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20?pretty" -H 'Content-Type: application/json' -d@"publication.json"
+curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20-concept?pretty" -H 'Content-Type: application/json' -d@"concept.json"
+
+#Adam suggested to add this. Change the HOST
+curl -XPUT 'http://$s-200617-101804.es-200617-101804.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20-concept/_settings' -H 'Content-Type: application/json' -d'{"index" : {"max_adjacency_matrix_filters" : 500}}'
 
 curl -X GET http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/_cat/indices
 
 # list of files stored in Google Storage
-gsutil ls gs://medline_2019_11/splitted/pubmed\*_bioentities\*.json.gz > bioentities_files.txt
-gsutil ls gs://medline_2019_11/splitted/pubmed\*_taggedtext\*.json.gz > taggedtext_files.txt
-gsutil ls gs://medline_2019_11/splitted/pubmed\*_small\*.json.gz > publication_files.txt
-gsutil ls gs://medline_2019_11/splitted/pubmed\*_concepts\*.json.gz > concepts_files.txt
+gsutil ls gs://medline_2020_06/splitted/pubmed\*_bioentities\*.json.gz > bioentities_files.txt
+gsutil ls gs://medline_2020_06/splitted/pubmed\*_taggedtext\*.json.gz > taggedtext_files.txt
+gsutil ls gs://medline_2020_06/splitted/pubmed\*_small\*.json.gz > publication_files.txt
+gsutil ls gs://medline_2020_06/splitted/pubmed\*_concepts\*.json.gz > concepts_files.txt
 
 
 # Taggedtext index // BEGIN FOR EVERY INDEX

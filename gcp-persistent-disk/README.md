@@ -36,11 +36,11 @@ Eg
 
 To test if the cluster is available and correct:
 
-> export $HOST= _[SERVICE_LABEL]_
-> curl http://$HOST.$HOST.il4.europe-west1.lb.open-targets-af.internal:9200
+> export HOST= _[SERVICE_LABEL]_
+> curl http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200
 >
-> curl -X GET "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-af.internal:9200/_cat/nodes?v&s=name"
-> curl -X GET "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-af.internal:9200/_cluster/health?pretty"
+> curl -X GET "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/_cat/nodes?v&s=name"
+> curl -X GET "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/_cluster/health?pretty"
 
 The script "steps.sh" contains the steps to load the data into the ES.
 
