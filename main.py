@@ -106,7 +106,7 @@ def json_serialize(obj):
 
 class _MedlineTextSource(_TextSource):
     def read_records(self, file_path, range_tracker):
-        logging.error("File info:"+file_path)
+        logging.info("File medline :"+file_path)
         file_name = file_path.split('/')[-1]
         record = []
         skip = True
@@ -383,13 +383,11 @@ def parse_article_info(article, publication):
         if e.tag == 'PublicationTypeList':
             pub_types = []
             if "PublicationType" in e:
-                logging.error("prima del for:")
                 for pub_type in e.PublicationType:
                     pub_types.append(pub_type.text)
-                logging.error("assign")
                 publication['pub_types'] = pub_types
             else:
-                logging.error("Cinzia publicationType not found")
+                logging.error("PublicationType not found")
 
 
         if e.tag == 'ELocationID' and e.attrib['EIdType'] == 'doi':
@@ -754,7 +752,6 @@ def run(argv=None):
     bq_table_schema = parse_bq_json_schema(json.loads(BQ_SCHEMA))
     # We use the save_main_session option because one or more DoFn's in this
     # workflow rely on global context (e.g., a module imported at module level).
-    print("buh")
     pipeline_options = PipelineOptions(pipeline_args)
     pipeline_options.view_as(SetupOptions).save_main_session = True
     with beam.Pipeline(options=pipeline_options) as p:
