@@ -17,32 +17,32 @@ tmux new-session "python load2es.py publication --es http://myes:9200"
 '''
 
 NODES = 37
-INDEX_NAME = 'pubmed-19'
+INDEX_NAME = 'pubmed-20'
 DOC_TYPE = 'publication'
 
 index_config = {
     'bioentity':
         dict(suffix='_bioentities.json.gz',
-             index='pubmed-19-bioentity',
+             index='pubmed-20-bioentity',
              doc_type='bioentity',
              mappings=None,
              pub_id=True),
     'taggedtext':
         dict(suffix='_taggedtext.json.gz',
-             index='pubmed-19-taggedtext',
+             index='pubmed-20-taggedtext',
              doc_type='taggedtext',
              mappings=None,
              pub_id=True),
     'publication':
         dict(suffix='_small.json.gz',
-             index='pubmed-19',
+             index='pubmed-20',
              doc_type='publication',
              mappings='publication.json',
              pub_id=True
              ),
     'concept':
         dict(suffix='_concepts.json.gz',
-             index='pubmed-19-concept',
+             index='pubmed-20-concept',
              doc_type='concept',
              mappings='concept.json',
              pub_id=False),
@@ -112,7 +112,7 @@ def read_remote_file(bucket, file_name, index_, doc_type, use_pub_id):
 
 def get_file_names(suffix):
     client = storage.Client(project='open-targets-library')
-    bucket = client.get_bucket('medline_2019_11')
+    bucket = client.get_bucket('medline_2020_06')
 
     for i in bucket.list_blobs(prefix='splitted/'):
         if i.name.endswith(suffix):
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
     # setup the google cloud storage bucket reading stuff
     client = storage.Client(project='open-targets-library')
-    bucket = client.get_bucket('medline_2019_11')
+    bucket = client.get_bucket('medline_2020_06')
 
     # prepate elasticsearch for loading
     valid_indices = list(set(args.indices) & set(index_config.keys()))
