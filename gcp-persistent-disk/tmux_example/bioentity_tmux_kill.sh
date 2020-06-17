@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILES=_YOUR_PATH_/loader/taggedtext_split_*
+FILES=_YOUR_PATH_/loader/bio_split_*
 tmux start-server
 for f in $FILES
 do

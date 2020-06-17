@@ -40,6 +40,14 @@ gsutil ls gs://medline_2020_06/splitted/pubmed\*_concepts\*.json.gz > concepts_f
 wc -l taggedtext_files.txt
 split -l 1180 taggedtext_files.txt taggedtext_split_
 
+# bioentities split
+wc -l bioentities_files.txt
+split -l 1180 bioentities_files.txt bio_split_
+
+# Concept
+wc -l concepts_files.txt
+split -l 11180 concepts_files.txt conc_split_
+
 
 #_index_name_tmux.sh
 # HOST=dns_name_hardcode (todo: change YOUR_PATH and HOST.)
@@ -75,7 +83,14 @@ done
 
 # Changed the refresh interval
 export HOST=dns_name_param
-curl -XPUT 'http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20-taggedtext/_settings' -d '{"index":{"refresh_interval":"1s”}}'
+curl -XPUT http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20-taggedtext/_settings -d '{"index":{"refresh_interval":"1s"}}'
+
+Eg,
+curl -XPUT http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20-bioentity/_settings -d '{"index":{"refresh_interval":"1s"}}'
+
+curl -XPUT http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20-concept/_settings -d '{"index":{"refresh_interval":"1s"}}'
+
+curl -XPUT http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20/_settings -d '{"index":{"refresh_interval":"1s"}}'
 
 
 #### IMPORTANT 
