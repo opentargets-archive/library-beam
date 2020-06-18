@@ -48,6 +48,9 @@ split -l 1180 bioentities_files.txt bio_split_
 wc -l concepts_files.txt
 split -l 11180 concepts_files.txt conc_split_
 
+# publication split
+wc -l publication_files.txt
+split -l 1180 publication_files.txt publ_split_
 
 #_index_name_tmux.sh
 # HOST=dns_name_hardcode (todo: change YOUR_PATH and HOST.)
@@ -97,6 +100,6 @@ curl -XPUT http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:
 The index es_concept.sh is slightly different due the id-field value
 
 time for file in $(cat ${input}); do gsutil cat $file | gunzip | elasticsearch_loader --es-host "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.int
-ernal:9200" --with-retry --bulk-size 10000 --index pubmed-19-concept --type concept json --json-lines - ; done
+ernal:9200" --with-retry --bulk-size 10000 --index pubmed-20-concept --type concept json --json-lines - ; done
 
 There are some examples under "tmux_example"
