@@ -103,3 +103,12 @@ time for file in $(cat ${input}); do gsutil cat $file | gunzip | elasticsearch_l
 ernal:9200" --with-retry --bulk-size 10000 --index pubmed-20-concept --type concept json --json-lines - ; done
 
 There are some examples under "tmux_example"
+
+#Publication Alias. esurl : replace with the proper URL
+
+curl -XPOST 'http://esurl:9200/_aliases?pretty' -H 'Content-Type: application/json' -d '
+    {
+        "actions": [
+            {"add": {"index": "pubmed-20", "alias": "!publication-data"}}
+        ]
+    } '

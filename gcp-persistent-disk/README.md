@@ -42,7 +42,8 @@ To test if the cluster is available and correct:
 > curl -X GET "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/_cat/nodes?v&s=name"
 > curl -X GET "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/_cluster/health?pretty"
 
-The script "steps.sh" contains the steps to load the data into the ES.
+
+The script "steps.sh" contains the steps to load the data into the ES. Please use this script as detailed reference.
 
 This is a prototype of infrastructure and the aim is builing a list of commands to run.
 
