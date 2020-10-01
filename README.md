@@ -10,20 +10,20 @@ Please see the [Apache Beam SDK](https://beam.apache.org/documentation/sdks/pyth
 Use python2 with pip and virtualenv
 
 * Generate a mirror of MEDLINE FTP to a Google Storage Bucket (any other storage provider supported by Python Beam SDK should work). E.g. using [rclone](https://rclone.org/)
-   
-   - Download [pre-built rclone binaries](https://rclone.org/install/#linux-installation-from-precompiled-binary) rather than platform packaged ones as they tend to be more up-to-date 
+
+   - Download [pre-built rclone binaries](https://rclone.org/install/#linux-installation-from-precompiled-binary) rather than platform packaged ones as they tend to be more up-to-date
    - configure rclone with MEDLINE FTP [ftp.ncbi.nlm.nih.gov](ftp://ftp.ncbi.nlm.nih.gov) and your target gcp project
      (my-gcp-project-buckets)  `rclone config`. Medline must have username `anonymous` and password `anonymous`.
    - Generate a full mirror:
      `rclone sync -v medline-ftp:pubmed/baseline my-gcp-project-buckets:my-medline-bucket/baseline`
    - Update new files:
      `rclone sync -v medline-ftp:pubmed/updatefiles my-gcp-project-buckets:my-medline-bucket/updatefiles`
-  - Note: you can use `--dry-run` argument to test 
+  - Note: you can use `--dry-run` argument to test
 * install tooling
     ```sh
     sudo apt-get install python-dev virtualenv build-essential git libxml2-dev libxslt-dev zlib1g-dev tmux
-    ``` 
-* Download the pipeline 
+    ```
+* Download the pipeline
     ```sh
     git clone https://github.com/opentargets/library-beam
     cd library-beam
@@ -34,11 +34,17 @@ Use python2 with pip and virtualenv
     source venv/bin/activate
     ```
 * Install the pipeline into the virtual environment   
-    ```sh 
+    ```sh
     python setup.py install
     #note this needs between 3.75GB and 7.5GB RAM
     pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.2.0/en_core_web_lg-2.2.0.tar.gz
     ```
+* Grant the permission to compute user.
+  ```
+  numberHidden -compute@developer.gserviceaccount.com 		Cloud Build Service Agent
+  ```    
+* Change the value for the vocabulary info under modules/vocabulary.py
+
 * Run pipeline
   ```sH
   python -m main \
@@ -56,19 +62,19 @@ Use python2 with pip and virtualenv
     --region europe-west1 \
     --zone europe-west1-d
   ```
-  
-  This can be monitored via [Google Dataflow](https://console.cloud.google.com/dataflow). Note that "wall time" displayed is not the [usual definition](https://en.wikipedia.org/wiki/Elapsed_real_time) but is per thread and worker. 
-  
+
+  This can be monitored via [Google Dataflow](https://console.cloud.google.com/dataflow). Note that "wall time" displayed is not the [usual definition](https://en.wikipedia.org/wiki/Elapsed_real_time) but is per thread and worker.
+
   In total it takes approximately 4h.
-  
+
   ![image](https://user-images.githubusercontent.com/148221/35000427-4e11b818-fadc-11e7-9c2f-08a68eaed37e.png)
-    
+
   ![image](https://user-images.githubusercontent.com/148221/35000458-6108bb24-fadc-11e7-8a84-452f7b3816f6.png)
-  
+
 ## Steps to load the JSON dumps into ElasticSearch
-  
+
   The directory gcp contains the infrastructure scripts to generate the Elasticsearch cluster.
-    
+
   * Create a virtual environment to manage dependencies in
     ```sh
     virtualenv venv_elasticsearch --python=python2
@@ -82,7 +88,7 @@ Use python2 with pip and virtualenv
   ```sh
   python load2es.py publication bioentity taggedtext concept --es http://es:9200
   ```
-  
+
   Note: Elasticsearch must have the International Components for Unicode support plugin installed.i.e. `/usr/share/elasticsearch/bin/elasticsearch-plugin -s install analysis-icu`
 
 * Increase elasticsearch capacity for the adjancency matrix aggregation (used by LINK tool)
