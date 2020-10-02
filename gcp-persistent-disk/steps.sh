@@ -1,13 +1,13 @@
-# DNS name 
+# DNS name
 # Eg.  http://es-201206-133204.es-201206-133204.il4.europe-west1.lb.open-targets-library.internal:9200
 # HOST=es-200617-101804
 # curl -X GET http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200
 
-export HOST=es-200617-101804
+export HOST=es-201002-123122
 
 # the number of shard is related with CPU and VMS. Eg. 3VMsx8cpu=24
 curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/_template/default" -H 'Content-Type: application/json' \
--d'{"template":"*","settings":{"number_of_shards":24}}' 
+-d'{"template":"*","settings":{"number_of_shards":24}}'
 
 mkdir loader
 cd loader
@@ -96,7 +96,7 @@ curl -XPUT http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:
 curl -XPUT http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20/_settings -d '{"index":{"refresh_interval":"1s"}}'
 
 
-#### IMPORTANT 
+#### IMPORTANT
 The index es_concept.sh is slightly different due the id-field value
 
 time for file in $(cat ${input}); do gsutil cat $file | gunzip | elasticsearch_loader --es-host "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.int
