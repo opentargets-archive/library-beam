@@ -23,15 +23,15 @@ curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal
 curl -XPUT "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20-concept?pretty" -H 'Content-Type: application/json' -d@"concept.json"
 
 #Adam suggested to add this. Change the HOST
-curl -XPUT 'http://$s-200617-101804.es-200617-101804.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20-concept/_settings' -H 'Content-Type: application/json' -d'{"index" : {"max_adjacency_matrix_filters" : 500}}'
+curl -XPUT 'http://es-201002-123122.es-201002-123122.il4.europe-west1.lb.open-targets-library.internal:9200/pubmed-20-concept/_settings' -H 'Content-Type: application/json' -d'{"index" : {"max_adjacency_matrix_filters" : 500}}'
 
 curl -X GET http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200/_cat/indices
 
 # list of files stored in Google Storage
-gsutil ls gs://medline_2020_06/splitted/pubmed\*_bioentities\*.json.gz > bioentities_files.txt
-gsutil ls gs://medline_2020_06/splitted/pubmed\*_taggedtext\*.json.gz > taggedtext_files.txt
-gsutil ls gs://medline_2020_06/splitted/pubmed\*_small\*.json.gz > publication_files.txt
-gsutil ls gs://medline_2020_06/splitted/pubmed\*_concepts\*.json.gz > concepts_files.txt
+gsutil ls gs://medline_2020_10/splitted/pubmed\*_bioentities\*.json.gz > bioentities_files.txt
+gsutil ls gs://medline_2020_10/splitted/pubmed\*_taggedtext\*.json.gz > taggedtext_files.txt
+gsutil ls gs://medline_2020_10/splitted/pubmed\*_small\*.json.gz > publication_files.txt
+gsutil ls gs://medline_2020_10/splitted/pubmed\*_concepts\*.json.gz > concepts_files.txt
 
 
 # Taggedtext index // BEGIN FOR EVERY INDEX
