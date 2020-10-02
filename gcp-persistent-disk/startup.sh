@@ -58,7 +58,7 @@ rm /tmp/elasticsearch-$ES_VERSION.deb
 #  http.port               use only 9200 nothing else
 #  bootstrap.memory_lock   disable swap
 #  xpack.security.enabled  turn off xpack extras
-cat > /etc/elasticsearch/elasticsearch.yml <<EOF_C 
+cat > /etc/elasticsearch/elasticsearch.yml <<EOF_C
 cloud:
   gce:
     project_id: open-targets-library
@@ -68,7 +68,7 @@ discovery:
     hosts_provider: gce
     minimum_master_nodes: 2
 indices.store.throttle.max_bytes_per_sec: "200mb"
-cluster.name: library202006v1
+cluster.name: library202010v1
 node.name: ${HOSTNAME}
 network.host: 0.0.0.0
 http.port: 9200
@@ -76,7 +76,7 @@ bootstrap.memory_lock: true
 EOF_C
 
 #configure elasticseach JVM
-cat > /etc/elasticsearch/jvm.options <<EOF_C 
+cat > /etc/elasticsearch/jvm.options <<EOF_C
 -Xms31g
 -Xmx31g
 #default elasticsearch settings
