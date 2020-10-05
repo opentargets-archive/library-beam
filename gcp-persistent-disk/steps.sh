@@ -38,19 +38,19 @@ gsutil ls gs://medline_2020_10/splitted/pubmed\*_concepts\*.json.gz > concepts_f
 
 #split the file for running 10 processes
 wc -l taggedtext_files.txt
-split -l 1180 taggedtext_files.txt taggedtext_split_
+split -l 1240 taggedtext_files.txt taggedtext_split_
 
 # bioentities split
 wc -l bioentities_files.txt
-split -l 1180 bioentities_files.txt bio_split_
+split -l 1240 bioentities_files.txt bio_split_
 
 # Concept
 wc -l concepts_files.txt
-split -l 11180 concepts_files.txt conc_split_
+split -l 11240 concepts_files.txt conc_split_
 
 # publication split
 wc -l publication_files.txt
-split -l 1180 publication_files.txt publ_split_
+split -l 1240 publication_files.txt publ_split_
 
 #_index_name_tmux.sh
 # HOST=dns_name_hardcode (todo: change YOUR_PATH and HOST.)
@@ -65,13 +65,12 @@ do
    echo $windowName
    tmux new-session -d -s ${windowName}
    tmux send-keys -t ${windowName} "source ~/library-beam/venv_elastic/bin/activate" Enter
-   tmux send-keys -t ${windowName} "export HOST=es-200617-101804" Enter
+   tmux send-keys -t ${windowName} "export HOST=es-201002-123122" Enter
    tmux send-keys -t ${windowName} "export input=${f}; ./es_tag.sh" Enter
 done
 
 # es_tag.sh
-time for file in $(cat ${input}); do gsutil cat $file | gunzip | elasticsearch_loader --es-host "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.int
-ernal:9200" --with-retry --bulk-size 10000 --index pubmed-20-taggedtext --type taggedtext --id-field pub_id json --json-lines - ; done
+time for file in $(cat ${input}); do gsutil cat $file | gunzip | elasticsearch_loader --es-host "http://$HOST.$HOST.il4.europe-west1.lb.open-targets-library.internal:9200" --with-retry --bulk-size 10000 --index pubmed-20-taggedtext --type taggedtext --id-field pub_id json --json-lines - ; done
 
 #Kill the list of tmux opened
 #!/bin/bash
