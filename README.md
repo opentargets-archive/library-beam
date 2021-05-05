@@ -1,3 +1,5 @@
+Note: This repo has been archived because LINK (Library) has been decommissioned.
+
 # Open Targets Library - NLP Pipeline
 
 ## NLP Analysis of MedLine/PubMed Running in Apache Beam
